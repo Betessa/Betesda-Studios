@@ -61,10 +61,6 @@ function secondLevel(){ // Will be the second state/level of the game. Update th
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(45,canvas.width/canvas.height,0.1,200);
-    camera.rotation.set(0,Math.PI/2,0);
-    camera.position.set(70,3,-70);
-
-
     var light = new THREE.DirectionalLight();   // A light shining from the direction of the camera; moves with the camera.
     light.position.set(0,0,1);
     camera.add(light);
@@ -81,9 +77,12 @@ function secondLevel(){ // Will be the second state/level of the game. Update th
 
     // Put Richard into the game.
     loader.load('./assets/characters/richard.glb',function(gltf){
-        gltf.scene.children[2].rotation.set(0,-Math.PI/2,0);
-        gltf.scene.children[2].position.set(65,0,-70);
+        gltf.scene.children[2].rotation.set(0,Math.PI,0);
         character.add(gltf.scene.children[2]);
+        character.position.set(65,0,-70);
+        camera.position.set(0,3,8);
+        character.add(camera);
+        character.rotation.set(0,Math.PI,0);
     });
     scene.add(character);
 }
@@ -181,42 +180,70 @@ window.onload = function(){
  *
  */
 
+ var keymap = {};
 function move(event){
-    var code = event.keyCode;
 
     if (level == 2){ // In the second level, Richard will be extremely fast.
-        switch(code) {
-            case 87: // forward "w"-key
-                character.translateX(-2);
-                distanceBetween = position.manhattanDistanceTo(destination2);
-                if (distanceBetween < 5) {
-                    console.log("hit");
-                }
 
-            break;
-            case 83: // backward "s"-key
-                character.translateX(2);
-                distanceBetween = position.manhattanDistanceTo(destination2);
+        if (keymap['w'] && keymap['d']){ // move forward and turn right
+            character.translateZ(-2);
+            character.rotateY(-Math.PI/50);
+            distanceBetween = position.manhattanDistanceTo(destination2);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
+        }
+        else if (keymap['w'] && keymap['a']){ //move forward and turn left
+            character.translateZ(-2);
+            character.rotateY(Math.PI/50);
+            distanceBetween = position.manhattanDistanceTo(destination2);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
+        }
+        else if (keymap['s'] && keymap['d']){ // move backward and turn right
+            character.translateZ(2);
+            character.rotateY(-Math.PI/50);
+            distanceBetween = position.manhattanDistanceTo(destination2);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
+        }
+        else if (keymap['s'] && keymap['a']){ // move backward and turn left
+            character.translateZ(2);
+            character.rotateY(Math.PI/50);
+            distanceBetween = position.manhattanDistanceTo(destination2);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
+        }
+        else if (keymap['w']){ // move forward
+            character.translateZ(-2);
+            distanceBetween = position.manhattanDistanceTo(destination2);
                 if (distanceBetween < 5) {
                     console.log("hit");
                 }
-            break;
-            case 68: // right "d"-key
-                character.translateZ(-2);
-                character.rotateY(Math.PI/1800); // Was originally set to -Math.PI/100
-                distanceBetween = position.manhattanDistanceTo(destination2);
+        }
+        else if (keymap['s']){ // move backward
+            character.translateZ(2);
+            distanceBetween = position.manhattanDistanceTo(destination2);
                 if (distanceBetween < 5) {
                     console.log("hit");
                 }
-            break;
-            case 65: // left "a"-key
-                character.translateZ(2);
-                character.rotateY(Math.PI/1800); // Was originally set to Math.PI/100
-                distanceBetween = position.manhattanDistanceTo(destination2);
-                if (distanceBetween < 5) {
-                    console.log("hit");
-                }
-            break;
+        }
+        else if (keymap['a']){ // turn right
+            character.rotateY(Math.PI/50); // Was originally set to -Math.PI/100
+            distanceBetween = position.manhattanDistanceTo(destination2);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
+        }
+        else if (keymap['d']){ // turn left
+            character.rotateY(-Math.PI/50); // Was originally set to -Math.PI/100
+            distanceBetween = position.manhattanDistanceTo(destination2);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
         }
     }
 }
@@ -253,7 +280,8 @@ function init() {
                 e + "</b>";
         return;
     }
-    document.addEventListener("keydown", move, false);
+    document.addEventListener("keydown", function(ev){keymap[ev.key] = ev.type == 'keydown';move(keymap);}, false);
+    document.addEventListener("keyup",function(ev){keymap[ev.key] = ev.type == 'keydown';move(keymap);}, false);
     secondLevel();
     //installOrbitControls();
     render();

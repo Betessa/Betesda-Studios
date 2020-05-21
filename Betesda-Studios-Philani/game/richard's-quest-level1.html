@@ -177,7 +177,6 @@ init();
 
 var keymap = {};
 function move(keymap){ // Will be used to move Richard.
-    var code = event.keyCode;
     if (level == 1){
         if (keymap['w'] && keymap['d']){ // move forward and turn right
             character.translateZ(-0.1);
