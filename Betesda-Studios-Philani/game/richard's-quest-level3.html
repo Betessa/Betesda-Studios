@@ -76,6 +76,16 @@
                 scene.add(gltf.scene);
             });
 
+            // Make skybox Background
+            scene.background = new THREE.CubeTextureLoader().setPath('skybox/').load([
+                'posx.jpg',
+                'negx.jpg',
+                'posy.jpg',
+                'negy.jpg',
+                'posz.jpg',
+                'negz.jpg'
+            ]);
+
             // Put Richard into the game.
             loader.load('./assets/characters/richard_new.glb',function(gltf){
                 mixer = new THREE.AnimationMixer(gltf.scene);
@@ -217,6 +227,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination3);
                     if (distanceBetween < 5) {
                         console.log("hit");
+                        location.assign("./assets/music-and-video/klein_wars_outro.mp4");
                     }
                 }
                 else if (keymap['w'] && keymap['a']){ //move forward and turn left
@@ -226,6 +237,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination3);
                     if (distanceBetween < 5) {
                         console.log("hit");
+                        location.assign("./assets/music-and-video/klein_wars_outro.mp4");
                     }
                 }
                 else if (keymap['s'] && keymap['d']){ // move backward and turn right
@@ -235,6 +247,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination3);
                     if (distanceBetween < 5) {
                         console.log("hit");
+                        location.assign("./assets/music-and-video/klein_wars_outro.mp4");
                     }
                 }
                 else if (keymap['s'] && keymap['a']){ // move backward and turn left
@@ -244,6 +257,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination3);
                     if (distanceBetween < 5) {
                         console.log("hit");
+                        location.assign("./assets/music-and-video/klein_wars_outro.mp4");
                     }
                 }
                 else if (keymap['w']){ // move forward
@@ -251,6 +265,7 @@
                     character.translateZ(Math.sin(posZ));
                     if (distanceBetween < 5) {
                         console.log("hit");
+                        location.assign("./assets/music-and-video/klein_wars_outro.mp4");
                     }
                 }
                 else if (keymap['s']){ // move backward
@@ -259,6 +274,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination3);
                     if (distanceBetween < 5) {
                         console.log("hit");
+                        location.assign("./assets/music-and-video/klein_wars_outro.mp4");
                     }
                 }
                 else if (keymap['a']){ // turn right
@@ -266,6 +282,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination3);
                     if (distanceBetween < 5) {
                         console.log("hit");
+                        location.assign("./assets/music-and-video/klein_wars_outro.mp4");
                     }
                 }
                 else if (keymap['d']){ // turn left
@@ -273,6 +290,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination3);
                     if (distanceBetween < 5) {
                         console.log("hit");
+                        location.assign("./assets/music-and-video/klein_wars_outro.mp4");
                     }
                 }
             }

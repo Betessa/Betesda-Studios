@@ -71,6 +71,16 @@
                 scene.add(gltf.scene);
             });
 
+            // Make skybox Background
+            scene.background = new THREE.CubeTextureLoader().setPath('skybox/').load([
+                'posx.jpg',
+                'negx.jpg',
+                'posy.jpg',
+                'negy.jpg',
+                'posz.jpg',
+                'negz.jpg'
+            ]);
+
             // Put Richard into the game.
             loader.load('./assets/characters/richard_new.glb',function(gltf){
                 mixer = new THREE.AnimationMixer(gltf.scene);
@@ -106,8 +116,7 @@
             mixer.update(0.01);
         }
 
-
-            // ------------------- Initialise the timer and set it to the appropriate length ----------------------
+        // ------------------- Initialise the timer and set it to the appropriate length ----------------------
 
         function CountDownTimer(duration, granularity) {
             this.duration = duration;

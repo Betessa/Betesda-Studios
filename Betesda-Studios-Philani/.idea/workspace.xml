@@ -2,7 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b2aa2ebb-08de-4623-9894-4572702c301c" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/game/CubeTextureLoader.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/music-and-video/klein_wars_outro.mp4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/skybox/negx.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/skybox/negy.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/skybox/negz.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/skybox/posx.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/skybox/posy.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/skybox/posz.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/skybox/readme.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/richard's-quest-level1.html" beforeDir="false" afterPath="$PROJECT_DIR$/game/richard's-quest-level1.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/richard's-quest-level2.html" beforeDir="false" afterPath="$PROJECT_DIR$/game/richard's-quest-level2.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/richard's-quest-level3.html" beforeDir="false" afterPath="$PROJECT_DIR$/game/richard's-quest-level3.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,10 +43,11 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$USER_HOME$/Downloads/richard's-quest.html" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/game/assets/music-and-video" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Philani\Documents\GitHub\Betesda-Studios\Betesda-Studios-Philani\game\assets\music-and-video" />
       <recent name="C:\Users\Philani\Documents\Wits University\YOS 3\Computer Graphics and Visualisation\Betesda-Studios-master\game" />
     </key>
   </component>
@@ -54,7 +67,9 @@
       <workItem from="1590052116274" duration="2674000" />
       <workItem from="1590057955250" duration="2984000" />
       <workItem from="1590063101314" duration="5465000" />
-      <workItem from="1590089020826" duration="3231000" />
+      <workItem from="1590089020826" duration="3727000" />
+      <workItem from="1590092995689" duration="62000" />
+      <workItem from="1590093058710" duration="2528000" />
     </task>
     <task id="LOCAL-00001" summary="Update for Beta">
       <created>1590091786575</created>
@@ -74,18 +89,18 @@
     <option name="LAST_COMMIT_MESSAGE" value="Update for Beta" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="413" y="111" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1590054414840">
+    <state x="413" y="111" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1590095694995">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="413" y="111" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1366.728@0.0.1366.728" timestamp="1590054414840" />
+    <state x="413" y="111" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1366.728@0.0.1366.728" timestamp="1590095694995" />
     <state x="260" y="0" key="CommitChangelistDialog2" timestamp="1590091785033">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="260" y="0" key="CommitChangelistDialog2/0.0.1366.728@0.0.1366.728" timestamp="1590091785033" />
-    <state x="463" y="119" key="FileChooserDialogImpl" timestamp="1590089549146">
+    <state x="463" y="119" key="FileChooserDialogImpl" timestamp="1590093055136">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="463" y="119" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1590089549146" />
+    <state x="463" y="119" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1590093055136" />
     <state x="275" y="97" key="Vcs.Push.Dialog.v2" timestamp="1590091896325">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
