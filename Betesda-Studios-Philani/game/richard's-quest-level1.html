@@ -57,11 +57,9 @@ function firstLevel(){ // Will be the "default" state/level of the game.
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(45,canvas.width/canvas.height,0.1,200);
-    camera.position.set(-34,3,47);
     var light = new THREE.DirectionalLight();   // A light shining from the direction of the camera; moves with the camera.
     light.position.set(0,0,1);
     camera.add(light);
-    character.add(camera);
     scene.add(new THREE.AmbientLight(0x404040));
     scene.add(new THREE.DirectionalLight(0xffffff,0.5)); // Dim light shining from above.
 
@@ -74,9 +72,11 @@ function firstLevel(){ // Will be the "default" state/level of the game.
 
     // Put Richard into the game.
     loader.load('./assets/characters/richard.glb',function(gltf){
-        gltf.scene.children[2].position.set(-34,0,39);
-        gltf.scene.children[2].rotation.set(0,-Math.PI,0);
+        gltf.scene.children[2].rotation.set(0,Math.PI,0);
         character.add(gltf.scene.children[2]);
+        character.position.set(-34,0,39);
+        camera.position.set(0,3,8);
+        character.add(camera);
     });
     scene.add(character);
 
@@ -178,40 +178,66 @@ init();
 var keymap = {};
 function move(keymap){ // Will be used to move Richard.
     var code = event.keyCode;
-
-    if (level == 1){ // In the first level, Richard will be very slow and groggy.
-        switch(code) {
-            case 87: // forward "w"-key
-                character.translateZ(-0.1);
-                distanceBetween = position.manhattanDistanceTo(destination1);
+    if (level == 1){
+        if (keymap['w'] && keymap['d']){ // move forward and turn right
+            character.translateZ(-0.1);
+            character.rotateY(-Math.PI/2250);
+            distanceBetween = position.manhattanDistanceTo(destination1);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
+        }
+        else if (keymap['w'] && keymap['a']){ //move forward and turn left
+            character.translateZ(-0.1);
+            character.rotateY(Math.PI/2250);
+            distanceBetween = position.manhattanDistanceTo(destination1);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
+        }
+        else if (keymap['s'] && keymap['d']){ // move backward and turn right
+            character.translateZ(-0.1);
+            character.rotateY(-Math.PI/2250);
+            distanceBetween = position.manhattanDistanceTo(destination1);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
+        }
+        else if (keymap['s'] && keymap['a']){ // move backward and turn left
+            character.translateZ(-0.1);
+            character.rotateY(Math.PI/2250);
+            distanceBetween = position.manhattanDistanceTo(destination1);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
+        }
+        else if (keymap['w']){ // move forward
+            character.translateZ(-0.1);
+            distanceBetween = position.manhattanDistanceTo(destination1);
                 if (distanceBetween < 5) {
                     console.log("hit");
                 }
-
-            break;
-            case 83: // backward "s"-key
-                character.translateZ(0.1);
-                distanceBetween = position.manhattanDistanceTo(destination1);
+        }
+        else if (keymap['s']){ // move backward
+            character.translateZ(0.1);
+            distanceBetween = position.manhattanDistanceTo(destination1);
                 if (distanceBetween < 5) {
                     console.log("hit");
                 }
-            break;
-            case 68: // right "d"-key
-                character.translateX(0.1);
-                character.rotateY(-Math.PI/2250); // Was originally set to -Math.PI/100
-                distanceBetween = position.manhattanDistanceTo(destination1);
-                if (distanceBetween < 5) {
-                    console.log("hit");
-                }
-            break;
-            case 65: // left "a"-key
-                character.translateX(-0.1);
-                character.rotateY(Math.PI/2250); // Was originally set to Math.PI/100
-                distanceBetween = position.manhattanDistanceTo(destination1);
-                if (distanceBetween < 5) {
-                    console.log("hit");
-                }
-            break;
+        }
+        else if (keymap['a']){ // turn right
+            character.rotateY(Math.PI/2250); // Was originally set to -Math.PI/100
+            distanceBetween = position.manhattanDistanceTo(destination1);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
+        }
+        else if (keymap['d']){ // turn left
+            character.rotateY(-Math.PI/2250); // Was originally set to -Math.PI/100
+            distanceBetween = position.manhattanDistanceTo(destination1);
+            if (distanceBetween < 5) {
+                console.log("hit");
+            }
         }
     }
 }
@@ -249,7 +275,8 @@ function init() {
                 e + "</b>";
         return;
     }
-    document.addEventListener("keydown", move, false);
+    document.addEventListener("keydown", function(ev){keymap[ev.key] = ev.type == 'keydown';move(keymap);}, false);
+    document.addEventListener("keyup",function(ev){keymap[ev.key] = ev.type == 'keydown';move(keymap);}, false);
     firstLevel();
     render();
 }
