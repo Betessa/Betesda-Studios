@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="468d4573-5012-42f2-b9d0-9ae8f23e3211" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/Betesda-Studios-master.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/OrbitControls.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/characters/PolyPaint.ms" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/characters/lpFemale_casual_G.FBX" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/characters/lpMale_casual_G.FBX" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/characters/peopleColors.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/characters/richard.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/coca-cola-bottle/coca-cola-bottle.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/coca-cola-bottle/maps/Thumbs.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/coca-cola-bottle/maps/label.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/coca-cola-bottle/maps/label_mask.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/coca-cola-bottle/maps/tapa.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/coca-cola-bottle/maps/tapamask copy copy.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/environment-objects/building_extra.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/environment-objects/building_msb.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/environment-objects/building_msl.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/environment-objects/building_wss.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/environment-objects/circles.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/environment-objects/full-scene.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/environment-objects/ground.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/environment-objects/scene.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/environment-objects/stands.glb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/music-and-video/Doom Theme.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/music-and-video/Eye of the Tiger.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/music-and-video/Sonic Theme.mp3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/music-and-video/video.mp4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/labs_print.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/labs_screen.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/richard's-quest-level1.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/richard's-quest-level2.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/richard's-quest-level3.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/three.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../sources.txt" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectId" id="1cEAiMmHG3zyq4M3TI3v57W7SQq" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../Wits University/YOS 3/Computer Graphics and Visualisation/richard's-quest.html" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="468d4573-5012-42f2-b9d0-9ae8f23e3211" name="Default Changelist" comment="" />
+      <created>1590083504856</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1590083504856</updated>
+      <workItem from="1590083507341" duration="2139000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="243" y="0" key="CommitChangelistDialog2" timestamp="1590088043487">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state x="243" y="0" key="CommitChangelistDialog2/0.0.1366.728@0.0.1366.728" timestamp="1590088043487" />
+    <state x="463" y="119" key="FileChooserDialogImpl" timestamp="1590088155304">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state x="463" y="119" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1590088155304" />
+  </component>
+</project>
