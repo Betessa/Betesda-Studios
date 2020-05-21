@@ -23,6 +23,7 @@
         var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
 
         var backGroundMusic; // Will be used for all the background music used in the game.
+        var jumpAction, idleAction, mixer; // Will be used to animate Richard's movements.
 
         /**
          *  The render function draws the scene.
@@ -71,12 +72,19 @@
             });
 
             // Put Richard into the game.
-            loader.load('./assets/characters/richard.glb',function(gltf){
-                gltf.scene.children[2].rotation.set(0,Math.PI,0);
-                character.add(gltf.scene.children[2]);
+            loader.load('./assets/characters/richard_new.glb',function(gltf){
+                mixer = new THREE.AnimationMixer(gltf.scene);
+                idleAction = mixer.clipAction(gltf.animations[1]);
+                jumpAction =  mixer.clipAction(gltf.animations[0]);
+
+                gltf.scene.scale.set(0.3,0.3,0.3);
+                gltf.scene.rotation.set(0,-Math.PI,0);
+
+                character.add(gltf.scene);
                 character.position.set(-34,0,39);
                 camera.position.set(0,3,8);
                 character.add(camera);
+                idleAction.play(); // Animate Richard
             });
             scene.add(character);
 
@@ -87,7 +95,19 @@
             });
         }
 
-        // ------------------- Initialise the timer and set it to the appropriate length ----------------------
+        /**
+         *  This function is called once for each frame of the animation, before
+         *  the render() function is called for that frame.  It updates any
+         *  animated properties.  The value of the global variable frameNumber
+         *  is incrementd 1 before this function is called.
+         */
+
+        function updateForFrame() {
+            mixer.update(0.01);
+        }
+
+
+            // ------------------- Initialise the timer and set it to the appropriate length ----------------------
 
         function CountDownTimer(duration, granularity) {
             this.duration = duration;
@@ -190,6 +210,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination1);
                     if (distanceBetween < 2) {
                         console.log("hit");
+                        location.assign("richard's-quest-level2.html");
                     }
                 }
                 else if (keymap['w'] && keymap['a']){ //move forward and turn left
@@ -198,6 +219,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination1);
                     if (distanceBetween < 2) {
                         console.log("hit");
+                        location.assign("richard's-quest-level2.html");
                     }
                 }
                 else if (keymap['s'] && keymap['d']){ // move backward and turn right
@@ -206,6 +228,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination1);
                     if (distanceBetween < 2) {
                         console.log("hit");
+                        location.assign("richard's-quest-level2.html");
                     }
                 }
                 else if (keymap['s'] && keymap['a']){ // move backward and turn left
@@ -214,6 +237,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination1);
                     if (distanceBetween < 2) {
                         console.log("hit");
+                        location.assign("richard's-quest-level2.html");
                     }
                 }
                 else if (keymap['w']){ // move forward
@@ -221,6 +245,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination1);
                     if (distanceBetween < 2) {
                         console.log("hit");
+                        location.assign("richard's-quest-level2.html");
                     }
                 }
                 else if (keymap['s']){ // move backward
@@ -228,6 +253,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination1);
                     if (distanceBetween < 2) {
                         console.log("hit");
+                        location.assign("richard's-quest-level2.html");
                     }
                 }
                 else if (keymap['a']){ // turn right
@@ -235,6 +261,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination1);
                     if (distanceBetween < 2) {
                         console.log("hit");
+                        location.assign("richard's-quest-level2.html");
                     }
                 }
                 else if (keymap['d']){ // turn left
@@ -242,6 +269,7 @@
                     distanceBetween = position.manhattanDistanceTo(destination1);
                     if (distanceBetween < 2) {
                         console.log("hit");
+                        location.assign("richard's-quest-level2.html");
                     }
                 }
             }
@@ -251,6 +279,7 @@
 
         function doFrame() {
             if (animating) {
+                updateForFrame();
                 frameNumber++;
                 render();
                 requestAnimationFrame(doFrame);
@@ -288,12 +317,12 @@
         function changeView(el) { // This will be used to change the view from first to second person.
             if (el.value === "First Person" ){
                 el.value = "Third Person";
-                camera.translateZ(-7);
+                camera.translateZ(-9);
                 camera.translateY(-1);
             }
             else{
                 el.value = "First Person";
-                camera.translateZ(7);
+                camera.translateZ(9);
                 camera.translateY(1);
             }
         }
