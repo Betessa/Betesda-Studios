@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Richard's Very Bad Terrible No Good Morning</title>
-    <script src="three.js"></script>
-    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="scripts/three.js"></script>
+    <script src="scripts/GLTFLoader.js"></script>
 
     <script>
 
@@ -72,7 +72,7 @@
             });
 
             // Make skybox Background
-            scene.background = new THREE.CubeTextureLoader().setPath('skybox/').load([
+            scene.background = new THREE.CubeTextureLoader().setPath('assets/skybox/').load([
                 'posx.jpg',
                 'negx.jpg',
                 'posy.jpg',
@@ -82,7 +82,7 @@
             ]);
 
             // Put Richard into the game.
-            loader.load('./assets/characters/richard_new.glb',function(gltf){
+            loader.load('./assets/characters/richard.glb',function(gltf){
                 mixer = new THREE.AnimationMixer(gltf.scene);
                 idleAction = mixer.clipAction(gltf.animations[1]);
                 jumpAction =  mixer.clipAction(gltf.animations[0]);
@@ -99,8 +99,8 @@
             scene.add(character);
 
             // Put the target (Redbull can) into the game.
-            loader.load('./assets/coca-cola-bottle/coca-cola-bottle.glb',function(gltf){
-                gltf.scene.position.set(-28,1,-60);
+            loader.load('./assets/environment-objects/coca-cola-bottle.glb',function(gltf){
+                gltf.scene.position.set(-28,2,-60);
                 scene.add(gltf.scene);
             });
         }
