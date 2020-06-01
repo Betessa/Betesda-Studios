@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>Richard's Very Bad Terrible No Good Morning</title>
+
+    <script src="/scripts/three.js"></script>
+    <script src="/scripts/physi.js"></script>
+    <script src="/scripts/OrbitControls.js"></script>
+    <script src="/scripts/GLTFLoader.js"></script>
+    <script src="/scripts/timer.js"></script>
+
+    <script>
+
+    "use strict";
+
+    Physijs.scripts.worker = '/scripts/physijs_worker.js';
+    // Physijs.scripts.ammo = '/scripts/ammo.js';
+
+    var canvas, render, light, loader, renderer, scene, camera; // Standard three.js requirements.
+
+    var normalMovement = true;
+
+    var character = {mesh: new THREE.Vector3( 0, 0, 0 )}
+    // var character = new THREE.Object3D(); // Will be used to store Richard and the cameras that follow him around (since he's so cool).
+    var position = character.mesh.position; // Will be used to keep track of the character's position after each button press.
+    var distanceBetween = new THREE.Vector3(); // Will be used to keep track of the distance between Richard and his target/goal.
+
+    var destination1 = new THREE.Vector3(-28,0,-60); // The area between MSB and MSL.
+    var level = 1; // Set to the first level of the game and update where appropriate.
+
+    var animating = false;  // Set to true when an animation is in progress.
+    var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
+
+    var backGroundMusic; // Will be used for all the background music used in the game.
+    var jumpAction, idleAction, mixer; // Will be used to animate Richard's movements.
+
+   window.onload = function() {
+        //event listeners
+
+        //timer initialisation
+        var display = document.querySelector('#time'),
+        timer = new CountDownTimer(5),
+        timeObj = CountDownTimer.parse(5);
+        
+        display.textContent = format(timeObj.minutes, timeObj.seconds);
+        timer.onTick(format);
+
+        document.querySelector('button').addEventListener('click', function () {
+            timer.start();
+            document.addEventListener("keydown", function(ev){keymap[ev.key] = ev.type == 'keydown';move(keymap);}, false);
+            document.addEventListener("keyup",function(ev){keymap[ev.key] = ev.type == 'keydown';move(keymap);}, false);
+        });
+
+        //renderer
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setSize( window.innerWidth, window.innerHeight - 300 );
+        renderer.setClearColor("white")
+		renderer.shadowMap.enabled = true;
+		renderer.shadowMapSoft = true;
+        document.getElementById( 'viewport' ).appendChild( renderer.domElement );
+        
+        //scene
+        scene = new Physijs.Scene;
+		scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
+		scene.addEventListener(
+			'update',
+			function() {
+				scene.simulate( undefined, 1 );
+			}
+        );
+        
+        //camera
+        camera = new THREE.PerspectiveCamera(
+            45,
+            window.innerWidth / window.innerHeight,
+            0.11,
+            200
+        );
+        camera.rotation.set(0,Math.PI,0);
+        camera.position.set(0,3,-8);
+
+        //lights
+        light = new THREE.DirectionalLight( 0xFFFFFF );
+        light.position.set(0,0,1);
+        light.castShadow = true;
+		light.shadow.camera.left = -60;
+		light.shadow.camera.right = 60;
+		light.shadow.camera.bottom = 60;
+		light.shadow.camera.near = 20;
+		light.shadow.camera.far = 200;
+		light.shadow.camera.top = -60;
+		light.shadow.bias = -.0001
+		light.shadow.mapSize.width = light.shadow.mapSize.height = 2048;
+        light.shadow.mapSize.darkness = .7;
+        scene.add( new THREE.AmbientLight( 0x404040 ) );
+        scene.add( new THREE.DirectionalLight( 0xffffff, 0.5 ) );   
+        
+        camera.add(light);
+        // character.add(camera);
+
+        //loader
+        loader = new THREE.GLTFLoader();
+        //load scene
+        loader.load('./assets/scene.glb',function(gltf){
+            gltf.scene.children.forEach(function(object){
+                if (object.type == 'Mesh'){
+                    scene.add(new Physijs.BoxMesh(new THREE.Geometry().fromBufferGeometry(object.geometry),Physijs.createMaterial(object.material, .5, .5), 0));
+                }
+                else {
+                    object.children.forEach(function(object){
+                        scene.add(new Physijs.BoxMesh(new THREE.Geometry().fromBufferGeometry(object.geometry),Physijs.createMaterial(object.material, .5, .5), 0));
+                    });
+                };
+            })
+        }); 
+        //load character
+        loader.load('./assets/characters/richard.glb',function(gltf){
+            character.mesh = new Physijs.CapsuleMesh(new THREE.Geometry().fromBufferGeometry(gltf.scene.children[0].children[2].geometry),gltf.scene.children[0].children[2].material,1);
+            character.mesh.position.set(64,0.01,-47);
+
+            character.mesh.add(camera);
+            scene.add(character.mesh);
+            character.constraint = new Physijs.DOFConstraint(
+                character.mesh, new THREE.Vector3( 0, 0, 0)
+            );
+            scene.addConstraint(character.constraint);
+            character.constraint.setLinearLowerLimit( new THREE.Vector3(-150,0,-150));
+            character.constraint.setLinearUpperLimit( new THREE.Vector3(150,0,150));
+            character.constraint.setAngularLowerLimit( new THREE.Vector3(0,-Math.PI/2,0));
+            character.constraint.setAngularUpperLimit( new THREE.Vector3(0,Math.PI/2,0));
+        }); 
+
+
+        requestAnimationFrame( render );
+		scene.simulate();
+    };
+
+    render = function() {
+        requestAnimationFrame(render);
+        renderer.render(scene,camera);
+    };
+
+    var keymap = {};
+    function move(keymap){
+        if (normalMovement == true){
+            if (keymap['w'] && keymap['d']){
+                character.mesh.translateZ(0.5);
+                character.mesh.__dirtyPosition = true;
+
+                character.mesh.rotateY(-Math.PI/100);
+                character.mesh.__dirtyRotation = true;
+
+                character.mesh.setLinearVelocity(new THREE.Vector3(0, 0, 0));
+                character.mesh.setAngularVelocity(new THREE.Vector3(0, 0, 0));
+            }
+            else if (keymap['w'] && keymap['a']){
+                character.mesh.translateZ(0.5);
+                character.mesh.__dirtyPosition = true;
+
+                character.mesh.rotateY(Math.PI/100);
+                character.mesh.__dirtyRotation = true;
+                
+                character.mesh.setLinearVelocity(new THREE.Vector3(0, 0, 0));
+                character.mesh.setAngularVelocity(new THREE.Vector3(0, 0, 0));
+            }
+            else if (keymap['s'] && keymap['d']){
+                character.mesh.translateZ(-0.5);
+                character.mesh.__dirtyPosition = true;
+
+                character.mesh.rotateY(-Math.PI/100);
+                character.mesh.__dirtyRotation = true;
+                
+                character.mesh.setLinearVelocity(new THREE.Vector3(0, 0, 0));
+                character.mesh.setAngularVelocity(new THREE.Vector3(0, 0, 0));
+            }
+            else if (keymap['s'] && keymap['a']){
+                character.mesh.translateZ(-0.5);
+                character.mesh.__dirtyPosition = true;
+
+                character.mesh.rotateY(Math.PI/100);
+                character.mesh.__dirtyRotation = true;
+                
+                character.mesh.setLinearVelocity(new THREE.Vector3(0, 0, 0));
+                character.mesh.setAngularVelocity(new THREE.Vector3(0, 0, 0));
+            }
+            if (keymap['w']){
+                character.mesh.translateZ(0.5);
+                character.mesh.__dirtyPosition = true;
+                
+                character.mesh.setLinearVelocity(new THREE.Vector3(0, 0, 0));
+            }
+            else if (keymap['s']){
+                character.mesh.translateZ(-0.5);
+                character.mesh.__dirtyPosition = true;
+
+                character.mesh.setLinearVelocity(new THREE.Vector3(0, 0, 0));
+            }
+            else if (keymap['a']){
+                character.mesh.rotateY(Math.PI/100);
+                character.mesh.__dirtyRotation = true;
+
+                character.mesh.setAngularVelocity(new THREE.Vector3(0, 0, 0));
+            }
+            else if (keymap['d']){
+                character.mesh.rotateY(-Math.PI/100);
+                character.mesh.__dirtyRotation = true;
+
+                character.mesh.setAngularVelocity(new THREE.Vector3(0, 0, 0));
+            }
+        }
+        else {
+            if (keymap['w'] && keymap['d']){
+                posZ += Math.PI/100;
+                character.translateZ(Math.sin(posZ));
+                character.rotateY(-Math.PI/100);
+            }
+            else if (keymap['w'] && keymap['a']){
+                posZ += Math.PI/100;
+                character.translateZ(Math.sin(posZ));
+                character.rotateY(Math.PI/100);
+            }
+            else if (keymap['s'] && keymap['d']){
+                posZ -= Math.PI/100;
+                character.translateZ(Math.sin(posZ));
+                character.rotateY(Math.PI/100);
+            }
+            else if (keymap['s'] && keymap['a']){
+                posZ -= Math.PI/100;
+                character.translateZ(Math.sin(posZ));
+                character.rotateY(-Math.PI/100);
+            }
+            else if (keymap['w']){
+                posZ += Math.PI/100;
+                character.translateZ(Math.sin(posZ));
+            }
+            else if (keymap['s']){
+                posZ -= Math.PI/100;
+                character.translateZ(Math.sin(posZ));
+            }
+            else if (keymap['a']){
+                character.rotateY(-Math.PI/100);
+            }
+            else if (keymap['d']){
+                character.rotateY(Math.PI/100);
+            }
+        }
+    }
+    </script>
+</head>
+
+<body>
+
+<h2>Richard's Very Bad Terrible No Good Morning</h2>
+
+
+
+<noscript>
+   <p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
+</noscript>
+
+<p style="color:#AA0000; font-weight: bold" id="message">
+</p>
+<p>
+Richard has overslept and needs to collect all the essentials and get to the CGV lecute fast!	&#128564
+</p>
+<p>
+    <button>Start Game</button>
+        <div>Class starts in <span id="time"></span> !!HURRY!</div>
+   <label><input type="checkbox" id="sinMovementCheckbox"><b>Sinusoidal Movement</b></label>
+   <b style="margin-left:50px">Use the mouse to rotate the model.</b>
+</p>
+
+<!-- <div id="canvas-holder" style="float:left; border: thin solid black; background-color: white">
+   <canvas width=1200 height=600 id="glcanvas"></canvas>
+</div> -->
+<div id="viewport"></div>
+
+</body>
+</html>
