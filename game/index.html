@@ -129,7 +129,6 @@
         }); 
         //load target object
         loader.load('./assets/environment-objects/coca-cola-bottle.glb', function(gltf){
-            console.log(gltf.scene.children[2].get)
             gltf.scene.children[2].position.set(-28,2,-60);
             scene.add(gltf.scene.children[2]);
         });
