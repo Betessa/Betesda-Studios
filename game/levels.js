@@ -6,8 +6,8 @@ export class Level{
         this.level = 1;
         switch(this.level){
             case 1:
-                this.character_position = (0,0,0);
-                this.target_position = (0,0,0);
+                this.character_position = new THREE.Vector3(-34,3,31);
+                this.target_position = new THREE.Vector3(-28,2,-60);
                 this.forward = -0.1;
                 this.left = Math.PI/2250;
                 this.backward = 0.1;

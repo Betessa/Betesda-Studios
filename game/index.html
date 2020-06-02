@@ -48,6 +48,11 @@
 
         document.querySelector('button').addEventListener('click', function () {
             timer.start();
+            mixer.update(level.walk_speed);
+            camera.scale.set(10/3,10/3,10/3);
+            character.scale.set(0.3,0.3,0.3);
+            character.translateY(1.5);
+            camera.translateZ(14.6);
             document.addEventListener("keydown", function(ev){
                 keymap[ev.key] = ev.type == 'keydown';
                 move(keymap);
