@@ -8,7 +8,6 @@
     <title>Richard's Very Bad Terrible No Good Morning</title>
 
     <script src="/scripts/three.js"></script>
-    <!-- <script type="module" src="/levels.js"></script> -->
     <script src="/scripts/OrbitControls.js"></script>
     <script src="/scripts/GLTFLoader.js"></script>
     <script src="/scripts/timer.js"></script>
@@ -21,10 +20,14 @@
     var canvas, light, loader, render, renderer, scene, camera; // Standard three.js requirements.
 
     var normalMovement = true;
+    var bounds = {"building-msb": new THREE.Box3(), "building-msl": new THREE.Box3(), "building-wss": new THREE.Box3(), "fountain": new THREE.Box3(),
+     "building-labs": new THREE.Box3(), "circle-fixture": new THREE.Box3(), "stands": new THREE.Box3()}
 
     var manager = new THREE.LoadingManager(); // To reassure Karen that all the assets are loaded
 
     var character = new THREE.Object3D(); // Will be used to store Richard and the cameras that follow him around (since he's so cool).
+    var character_box = new THREE.Box3(); // Will be used to detect collisions.
+    var target_box = new THREE.Box3(); // Colliding with this box ends the level.
     var position = character.position; // Will be used to keep track of the character's position after each button press.
     var distanceBetween = new THREE.Vector3(); // Will be used to keep track of the distance between Richard and his target/goal.
 
@@ -42,8 +45,15 @@
     };
     manager.onLoad = function ( ) {
         console.log( 'Loading complete!');
-        scene.getObjectByName("ground").children[0].geometry.addEventListener()
-        console.log(scene.getObjectByName("ground").children[0].geometry);
+
+        scene.getObjectByName("Character").position.y = scene.getObjectByName("ground").children[0].geometry.boundingBox.max.y;
+
+        for (var s in bounds){
+            bounds[s].setFromObject(scene.getObjectByName(s))
+        };
+
+        character_box.setFromObject(scene.getObjectByName("Character"));
+        target_box.setFromObject(scene.getObjectByName("coca-cola-bottle"));
 
         requestAnimationFrame( render );
         render;
@@ -151,6 +161,7 @@
         }); 
         //load target object
         loader.load('./assets/environment-objects/coca-cola-bottle.glb', function(gltf){
+            gltf.scene.children[2].position.set(-28,2,-60);
             scene.add(gltf.scene.children[2]);
         });        
     };
@@ -163,6 +174,12 @@
     var keymap = {};
     function move(keymap){
         mixer.update(level.walk_speed);
+        for (var s in bounds){
+            if (character_box.intersectsBox(bounds[s])){
+                console.log(s)
+            }   
+        }
+             
         if (keymap['w'] && keymap['d']){
             character.translateZ(level.forward);
             character.rotateY(level.right);
@@ -179,7 +196,7 @@
             character.translateZ(level.backward);
             character.rotateY(level.left);
         }
-        if (keymap['w']){
+        else if (keymap['w']){
             character.translateZ(level.forward);
         }
         else if (keymap['s']){
@@ -191,6 +208,8 @@
         else if (keymap['d']){
             character.rotateY(level.right);
         }
+        character_box.setFromObject(scene.getObjectByName("Character"));
+        character.updateWorldMatrix(true,true);
     }
     </script>
 </head>
