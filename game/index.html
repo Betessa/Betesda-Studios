@@ -22,6 +22,8 @@
 
     var normalMovement = true;
 
+    var manager = new THREE.LoadingManager(); // To reassure Karen that all the assets are loaded
+
     var character = new THREE.Object3D(); // Will be used to store Richard and the cameras that follow him around (since he's so cool).
     var position = character.position; // Will be used to keep track of the character's position after each button press.
     var distanceBetween = new THREE.Vector3(); // Will be used to keep track of the distance between Richard and his target/goal.
@@ -35,8 +37,28 @@
     var backGroundMusic; // Will be used for all the background music used in the game.
     var jumpAction, idleAction, mixer = new THREE.AnimationMixer(); // Will be used to animate Richard's movements.
 
+    manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+        console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+    };
+    manager.onLoad = function ( ) {
+        console.log( 'Loading complete!');
+        scene.getObjectByName("ground").children[0].geometry.addEventListener()
+        console.log(scene.getObjectByName("ground").children[0].geometry);
+
+        requestAnimationFrame( render );
+        render;
+    };
+    manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+        console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+    };
+    manager.onError = function ( url ) {
+        console.log( 'There was an error loading ' + url );
+    };
+
    window.onload = function() {
         level.setup();
+
+        //
 
         //timer initialisation
         var display = document.querySelector('#time'),
@@ -48,11 +70,6 @@
 
         document.querySelector('button').addEventListener('click', function () {
             timer.start();
-            mixer.update(level.walk_speed);
-            camera.scale.set(10/3,10/3,10/3);
-            character.scale.set(0.3,0.3,0.3);
-            character.translateY(1.5);
-            camera.translateZ(14.6);
             document.addEventListener("keydown", function(ev){
                 keymap[ev.key] = ev.type == 'keydown';
                 move(keymap);
@@ -102,7 +119,7 @@
         // character.add(camera);
         
         //loader
-        loader = new THREE.GLTFLoader();
+        loader = new THREE.GLTFLoader(manager);
         //load skybox
         scene.background = new THREE.CubeTextureLoader().setPath('./assets/skybox/').load([
             'posx.jpg',
@@ -114,15 +131,15 @@
         ]);
         //load scene
         loader.load('./assets/environment-objects/scene.glb',function(gltf){
-            scene.add(gltf.scene);
+            scene.add(gltf.scene)
         }); 
         //load character
-        loader.load('./assets/characters/richard.glb',function(gltf){
+        loader.load('./assets/characters/2richard2curious.glb',function(gltf){
             mixer = new THREE.AnimationMixer(gltf.scene);
-            idleAction = mixer.clipAction(gltf.animations[1]);
-            jumpAction =  mixer.clipAction(gltf.animations[0]);
+            idleAction = mixer.clipAction(gltf.animations[0]);
+            jumpAction =  mixer.clipAction(gltf.animations[1]);
 
-            gltf.scene.scale.set(0.3,0.3,0.3);
+            gltf.scene.scale.set(0.1,0.1,0.1);
             gltf.scene.rotation.set(0,-Math.PI,0);
 
             character.add(gltf.scene);
@@ -134,12 +151,8 @@
         }); 
         //load target object
         loader.load('./assets/environment-objects/coca-cola-bottle.glb', function(gltf){
-            gltf.scene.children[2].position.set(-28,2,-60);
             scene.add(gltf.scene.children[2]);
-        });
-
-        requestAnimationFrame( render );
-        render;
+        });        
     };
 
     render = function() {
