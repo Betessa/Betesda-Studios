@@ -8,209 +8,206 @@
     <title>Richard's Very Bad Terrible No Good Morning</title>
 
     <script src="/scripts/three.js"></script>
+    <script src="/scripts/ConvexHull.js"></script>
     <script src="/scripts/OrbitControls.js"></script>
     <script src="/scripts/GLTFLoader.js"></script>
     <script src="/scripts/timer.js"></script>
 
     <script type="module">
-    import * as LEVELS from './levels.js'
+        import * as LEVELS from '/levels.js';
 
-    "use strict";
+        "use strict";
 
-    var canvas, light, loader, render, renderer, scene, camera; // Standard three.js requirements.
+        var canvas, light, loader, render, renderer, scene, camera; // Standard three.js requirements.
 
-    var normalMovement = true;
-    var bounds = {"building-msb": new THREE.Box3(), "building-msl": new THREE.Box3(), "building-wss": new THREE.Box3(), "fountain": new THREE.Box3(),
-     "building-labs": new THREE.Box3(), "circle-fixture": new THREE.Box3(), "stands": new THREE.Box3()}
+        var bounds = {"building-msb": new THREE.ConvexHull(), "building-msl": new THREE.ConvexHull(), "building-wss": new THREE.ConvexHull(), "fountain": new THREE.ConvexHull(),
+        "building-labs": new THREE.ConvexHull(), "circle-fixture": new THREE.ConvexHull(), "stands": new THREE.ConvexHull()}; // defines objects in the scene for collision detection
+        var character_box = new THREE.ConvexHull(), target_box = new THREE.ConvexHull(); // Will be used to detect collisions.
+        var trajectoryRay = new Raycaster(); // a ray will be cast in the direction of movement. If it intersects a convex hull, that's a collision.
 
-    var manager = new THREE.LoadingManager(); // To reassure Karen that all the assets are loaded
+        var manager = new THREE.LoadingManager(); // To reassure Karen that all the assets are loaded
 
-    var character = new THREE.Object3D(); // Will be used to store Richard and the cameras that follow him around (since he's so cool).
-    var character_box = new THREE.Box3(); // Will be used to detect collisions.
-    var target_box = new THREE.Box3(); // Colliding with this box ends the level.
-    var position = character.position; // Will be used to keep track of the character's position after each button press.
-    var distanceBetween = new THREE.Vector3(); // Will be used to keep track of the distance between Richard and his target/goal.
+        var character = new THREE.Object3D(); // Will be used to store Richard and the cameras that follow him around (since he's so cool).
 
-    var destination1 = new THREE.Vector3(-28,0,-60); // The area between MSB and MSL.
-    var level = new LEVELS.Level(); // Set to the first level of the game and update where appropriate.
+        var position = character.position; // Will be used to keep track of the character's position after each button press.
+        var distanceBetween = new THREE.Vector3(); // Will be used to keep track of the distance between Richard and his target/goal.
 
-    var animating = false;  // Set to true when an animation is in progress.
-    var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
+        var destination1 = new THREE.Vector3(-28,0,-60); // The area between MSB and MSL.
+        var level = new LEVELS.Level(); // Set to the first level of the game and update where appropriate.
 
-    var backGroundMusic; // Will be used for all the background music used in the game.
-    var jumpAction, idleAction, mixer = new THREE.AnimationMixer(); // Will be used to animate Richard's movements.
+        var animating = false;  // Set to true when an animation is in progress.
+        var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
 
-    manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
-        console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
-    };
-    manager.onLoad = function ( ) {
-        console.log( 'Loading complete!');
+        var backGroundMusic; // Will be used for all the background music used in the game.
+        var jumpAction, idleAction, mixer = new THREE.AnimationMixer(); // Will be used to animate Richard's movements.
 
-        scene.getObjectByName("Character").position.y = scene.getObjectByName("ground").children[0].geometry.boundingBox.max.y;
+        manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+            console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+        };
+        manager.onLoad = function ( ) {
+            console.log( 'Loading complete!');
 
-        for (var s in bounds){
-            bounds[s].setFromObject(scene.getObjectByName(s))
+            scene.getObjectByName("Character").position.y = scene.getObjectByName("ground").children[0].geometry.boundingBox.max.y;
+
+            for (var s in bounds){
+                bounds[s].setFromObject(scene.getObjectByName(s))
+            };
+
+            character_box.setFromObject(scene.getObjectByName("Character"));
+            target_box.setFromObject(scene.getObjectByName("coca-cola-bottle"));
+
+            requestAnimationFrame( render );
+            render;
+        };
+        manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+            console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+        };
+        manager.onError = function ( url ) {
+            console.log( 'There was an error loading ' + url );
         };
 
-        character_box.setFromObject(scene.getObjectByName("Character"));
-        target_box.setFromObject(scene.getObjectByName("coca-cola-bottle"));
+    window.onload = function() {
+            level.setup();
 
-        requestAnimationFrame( render );
-        render;
-    };
-    manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
-        console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
-    };
-    manager.onError = function ( url ) {
-        console.log( 'There was an error loading ' + url );
-    };
+            //
 
-   window.onload = function() {
-        level.setup();
+            //timer initialisation
+            var display = document.querySelector('#time'),
+            timer = new CountDownTimer(5),
+            timeObj = CountDownTimer.parse(5);
+            
+            display.textContent = format(timeObj.minutes, timeObj.seconds);
+            timer.onTick(format);
 
-        //
+            document.querySelector('button').addEventListener('click', function () {
+                timer.start();
+                document.addEventListener("keydown", function(ev){
+                    keymap[ev.key] = ev.type == 'keydown';
+                    move(keymap);
+                }, false);
+                document.addEventListener("keyup",function(ev){
+                    keymap[ev.key] = ev.type == 'keydown';
+                    move(keymap);
+                }, false);
+            });
 
-        //timer initialisation
-        var display = document.querySelector('#time'),
-        timer = new CountDownTimer(5),
-        timeObj = CountDownTimer.parse(5);
-        
-        display.textContent = format(timeObj.minutes, timeObj.seconds);
-        timer.onTick(format);
+            //renderer
+            try {
+                    renderer = new THREE.WebGLRenderer({
+                        antialias: true,
+                        alpha: true
+                    });
+                    renderer.setSize(window.innerWidth - 100, window.innerHeight - 300);
+                    renderer.shadowMap.enabled = true;
+                    renderer.shadowMapSoft = true;
+                    renderer.setClearColor("white");
+                    document.getElementById( 'viewport' ).appendChild( renderer.domElement );
+                }
+                catch (e) {
+                    document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
+                        e + "</b>";
+                    return;
+                }
+            
+            //scene
+            scene = new THREE.Scene();
+            
+            //camera
+            camera = new THREE.PerspectiveCamera(
+                45,
+                (window.innerWidth - 100)/(window.innerHeight - 300),
+                0.11,
+                200
+            );
 
-        document.querySelector('button').addEventListener('click', function () {
-            timer.start();
-            document.addEventListener("keydown", function(ev){
-                keymap[ev.key] = ev.type == 'keydown';
-                move(keymap);
-            }, false);
-            document.addEventListener("keyup",function(ev){
-                keymap[ev.key] = ev.type == 'keydown';
-                move(keymap);
-            }, false);
-        });
+            //lights
+            light = new THREE.DirectionalLight( 0xFFFFFF );
+            light.position.set(0,0,1);
+            scene.add( new THREE.AmbientLight( 0x404040 ) );
+            scene.add( new THREE.DirectionalLight( 0xffffff, 0.5 ) );   
+            
+            camera.add(light);
+            // character.add(camera);
+            
+            //loader
+            loader = new THREE.GLTFLoader(manager);
+            //load skybox
+            scene.background = new THREE.CubeTextureLoader().setPath('./assets/skybox/').load([
+                'posx.jpg',
+                'negx.jpg',
+                'posy.jpg',
+                'negy.jpg',
+                'posz.jpg',
+                'negz.jpg'
+            ]);
+            //load scene
+            loader.load('./assets/environment-objects/scene.glb',function(gltf){
+                scene.add(gltf.scene)
+            }); 
+            //load character
+            loader.load('./assets/characters/2richard2curious.glb',function(gltf){
+                mixer = new THREE.AnimationMixer(gltf.scene);
+                idleAction = mixer.clipAction(gltf.animations[0]);
+                jumpAction =  mixer.clipAction(gltf.animations[1]);
 
-        //renderer
-        try {
-                renderer = new THREE.WebGLRenderer({
-                    antialias: true,
-                    alpha: true
-                });
-                renderer.setSize(window.innerWidth - 100, window.innerHeight - 300);
-                renderer.shadowMap.enabled = true;
-		        renderer.shadowMapSoft = true;
-                renderer.setClearColor("white");
-                document.getElementById( 'viewport' ).appendChild( renderer.domElement );
+                gltf.scene.scale.set(0.1,0.1,0.1);
+                gltf.scene.rotation.set(0,-Math.PI,0);
+
+                character.add(gltf.scene);
+                character.position.set(-34,0,39);
+                camera.position.set(0,3,8);
+                character.add(camera);
+                idleAction.play(); // Animate Richard
+                scene.add(character);
+            }); 
+            //load target object
+            loader.load('./assets/environment-objects/coca-cola-bottle.glb', function(gltf){
+                gltf.scene.children[2].position.set(-28,2,-60);
+                scene.add(gltf.scene.children[2]);
+            });        
+        };
+
+        render = function() {
+            requestAnimationFrame(render);
+            renderer.render(scene,camera);
+        };
+
+        var keymap = {};
+        function move(keymap){
+            mixer.update(level.walk_speed);
+            trajectoryRay.set(character.position)
+                
+            if (keymap['w'] && keymap['d']){
+                character.translateZ(level.forward);
+                character.rotateY(level.right);
             }
-            catch (e) {
-                document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
-                    e + "</b>";
-                return;
+            else if (keymap['w'] && keymap['a']){
+                character.translateZ(level.forward);
+                character.rotateY(level.left);
             }
-        
-        //scene
-        scene = new THREE.Scene();
-        
-        //camera
-        camera = new THREE.PerspectiveCamera(
-            45,
-            (window.innerWidth - 100)/(window.innerHeight - 300),
-            0.11,
-            200
-        );
-
-        //lights
-        light = new THREE.DirectionalLight( 0xFFFFFF );
-        light.position.set(0,0,1);
-        scene.add( new THREE.AmbientLight( 0x404040 ) );
-        scene.add( new THREE.DirectionalLight( 0xffffff, 0.5 ) );   
-        
-        camera.add(light);
-        // character.add(camera);
-        
-        //loader
-        loader = new THREE.GLTFLoader(manager);
-        //load skybox
-        scene.background = new THREE.CubeTextureLoader().setPath('./assets/skybox/').load([
-            'posx.jpg',
-            'negx.jpg',
-            'posy.jpg',
-            'negy.jpg',
-            'posz.jpg',
-            'negz.jpg'
-        ]);
-        //load scene
-        loader.load('./assets/environment-objects/scene.glb',function(gltf){
-            scene.add(gltf.scene)
-        }); 
-        //load character
-        loader.load('./assets/characters/2richard2curious.glb',function(gltf){
-            mixer = new THREE.AnimationMixer(gltf.scene);
-            idleAction = mixer.clipAction(gltf.animations[0]);
-            jumpAction =  mixer.clipAction(gltf.animations[1]);
-
-            gltf.scene.scale.set(0.1,0.1,0.1);
-            gltf.scene.rotation.set(0,-Math.PI,0);
-
-            character.add(gltf.scene);
-            character.position.set(-34,0,39);
-            camera.position.set(0,3,8);
-            character.add(camera);
-            idleAction.play(); // Animate Richard
-            scene.add(character);
-        }); 
-        //load target object
-        loader.load('./assets/environment-objects/coca-cola-bottle.glb', function(gltf){
-            gltf.scene.children[2].position.set(-28,2,-60);
-            scene.add(gltf.scene.children[2]);
-        });        
-    };
-
-    render = function() {
-        requestAnimationFrame(render);
-        renderer.render(scene,camera);
-    };
-
-    var keymap = {};
-    function move(keymap){
-        mixer.update(level.walk_speed);
-        for (var s in bounds){
-            if (character_box.intersectsBox(bounds[s])){
-                console.log(s)
-            }   
+            else if (keymap['s'] && keymap['d']){
+                character.translateZ(level.backward);
+                character.rotateY(level.right);
+            }
+            else if (keymap['s'] && keymap['a']){
+                character.translateZ(level.backward);
+                character.rotateY(level.left);
+            }
+            else if (keymap['w']){
+                character.translateZ(level.forward);
+            }
+            else if (keymap['s']){
+                character.translateZ(level.backward);
+            }
+            else if (keymap['a']){
+                character.rotateY(level.left);
+            }
+            else if (keymap['d']){
+                character.rotateY(level.right);
+            }
+            character_box.setFromObject(scene.getObjectByName("Character"));
+            character.updateWorldMatrix(true,true);
         }
-             
-        if (keymap['w'] && keymap['d']){
-            character.translateZ(level.forward);
-            character.rotateY(level.right);
-        }
-        else if (keymap['w'] && keymap['a']){
-            character.translateZ(level.forward);
-            character.rotateY(level.left);
-        }
-        else if (keymap['s'] && keymap['d']){
-            character.translateZ(level.backward);
-            character.rotateY(level.right);
-        }
-        else if (keymap['s'] && keymap['a']){
-            character.translateZ(level.backward);
-            character.rotateY(level.left);
-        }
-        else if (keymap['w']){
-            character.translateZ(level.forward);
-        }
-        else if (keymap['s']){
-            character.translateZ(level.backward);
-        }
-        else if (keymap['a']){
-            character.rotateY(level.left);
-        }
-        else if (keymap['d']){
-            character.rotateY(level.right);
-        }
-        character_box.setFromObject(scene.getObjectByName("Character"));
-        character.updateWorldMatrix(true,true);
-    }
     </script>
 </head>
 
@@ -236,9 +233,6 @@ Richard has overslept and needs to collect all the essentials and get to the CGV
    <b style="margin-left:50px">Use the mouse to rotate the model.</b>
 </p>
 
-<!-- <div id="canvas-holder" style="float:left; border: thin solid black; background-color: white">
-   <canvas width=1200 height=600 id="glcanvas"></canvas>
-</div> -->
 <div id="viewport"></div>
 
 </body>
