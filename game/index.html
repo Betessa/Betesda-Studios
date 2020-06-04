@@ -19,11 +19,9 @@
         "use strict";
 
         var canvas, light, loader, render, renderer, scene, camera; // Standard three.js requirements.
-
-        var bounds = {"building-msb": new THREE.ConvexHull(), "building-msl": new THREE.ConvexHull(), "building-wss": new THREE.ConvexHull(), "fountain": new THREE.ConvexHull(),
-        "building-labs": new THREE.ConvexHull(), "circle-fixture": new THREE.ConvexHull(), "stands": new THREE.ConvexHull()}; // defines objects in the scene for collision detection
-        var character_box = new THREE.ConvexHull(), target_box = new THREE.ConvexHull(); // Will be used to detect collisions.
-        var trajectoryRay = new Raycaster(); // a ray will be cast in the direction of movement. If it intersects a convex hull, that's a collision.
+        
+        var trajectoryRay = new THREE.Raycaster(); // a ray will be cast in the direction of movement. If it intersects an object, that's a collision.
+        var environment = []; // all environment objects in the scene
 
         var manager = new THREE.LoadingManager(); // To reassure Karen that all the assets are loaded
 
@@ -46,16 +44,8 @@
         };
         manager.onLoad = function ( ) {
             console.log( 'Loading complete!');
-
-            scene.getObjectByName("Character").position.y = scene.getObjectByName("ground").children[0].geometry.boundingBox.max.y;
-
-            for (var s in bounds){
-                bounds[s].setFromObject(scene.getObjectByName(s))
-            };
-
-            character_box.setFromObject(scene.getObjectByName("Character"));
-            target_box.setFromObject(scene.getObjectByName("coca-cola-bottle"));
-
+            environment = [scene.getObjectByName("building-msb"),scene.getObjectByName("building-msl"),scene.getObjectByName("building-wss"),scene.getObjectByName("fountain"),
+                                     scene.getObjectByName("building-labs"),scene.getObjectByName("circle-fixture"),scene.getObjectByName("stands")];
             requestAnimationFrame( render );
             render;
         };
@@ -175,11 +165,17 @@
         var keymap = {};
         function move(keymap){
             mixer.update(level.walk_speed);
-            trajectoryRay.set(character.position)
+            var ghost = character.clone(); // moves ahead of the character to check for collision
+            ghost.visible = false;
                 
             if (keymap['w'] && keymap['d']){
-                character.translateZ(level.forward);
-                character.rotateY(level.right);
+                ghost.translateZ(level.forward);
+                ghost.rotateY(level.right);
+                trajectoryRay.set(character.position,ghost.position.normalize());
+                if (true){
+                    character.translateZ(level.forward);
+                    character.rotateY(level.right);
+                }
             }
             else if (keymap['w'] && keymap['a']){
                 character.translateZ(level.forward);
@@ -194,7 +190,12 @@
                 character.rotateY(level.left);
             }
             else if (keymap['w']){
-                character.translateZ(level.forward);
+                ghost.translateZ(level.forward);
+                trajectoryRay.set(character.position,ghost.position.normalize());
+                if (trajectoryRay.intersectObjects(environment).length == 0){
+                    character.translateZ(level.forward);
+                }
+                console.log(trajectoryRay.intersectObjects(environment))
             }
             else if (keymap['s']){
                 character.translateZ(level.backward);
@@ -205,7 +206,7 @@
             else if (keymap['d']){
                 character.rotateY(level.right);
             }
-            character_box.setFromObject(scene.getObjectByName("Character"));
+
             character.updateWorldMatrix(true,true);
         }
     </script>
