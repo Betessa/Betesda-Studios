@@ -44,8 +44,6 @@
         };
         manager.onLoad = function ( ) {
             console.log( 'Loading complete!');
-            // environment = [scene.getObjectByName("building-msb"),scene.getObjectByName("building-msl")/*,scene.getObjectByName("building-wss"),/*scene.getObjectByName("fountain"),*/
-            //                          /*scene.getObjectByName("building-labs")*/,scene.getObjectByName("circle-fixture"),scene.getObjectByName("stands")];
             trajectoryRay.far = 0.1;
             requestAnimationFrame( render );
             render;
