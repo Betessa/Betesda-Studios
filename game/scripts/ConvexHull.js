@@ -161,8 +161,8 @@ THREE.ConvexHull = ( function () {
 
 				// interpret faces as planes for the further computation
 
-				var vN = face.distanceToPoint( ray.origin );
-				var vD = face.normal.dot( ray.direction );
+				var vN = face.distanceToPoint( ray.ray.origin );
+				var vD = face.normal.dot( ray.ray.direction );
 
 				// if the origin is on the positive side of a plane (so the plane can "see" the origin) and
 				// the ray is turned away or parallel to the plane, there is no intersection
@@ -210,11 +210,11 @@ THREE.ConvexHull = ( function () {
 
 			if ( tNear !== - Infinity ) {
 
-				ray.at( tNear, target );
+				ray.ray.at( tNear, target );
 
 			} else {
 
-				ray.at( tFar, target );
+				ray.ray.at( tFar, target );
 
 			}
 

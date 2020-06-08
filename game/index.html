@@ -20,9 +20,7 @@
         var canvas, light, loader, render, renderer, scene, camera; // Standard three.js requirements.
         
         var trajectoryRay = new THREE.Raycaster(); // a ray will be cast in the direction of movement. If it intersects an object, that's a collision.
-        var environment = []; // all environment objects in the scene
-        var bounds = {"building-msb": new THREE.ConvexHull(), "building-msl": new THREE.ConvexHull(), "building-wss": new THREE.ConvexHull(), "fountain": new THREE.ConvexHull(),
-                            "building-labs": new THREE.ConvexHull(), "circle-fixture": new THREE.ConvexHull(), "stands": new THREE.ConvexHull()}; // defines objects in the scene for collision detection
+        var colliders = new THREE.Group(); // all environment objects in the scene
 
         var manager = new THREE.LoadingManager(); // To reassure Karen that all the assets are loaded
 
@@ -38,6 +36,7 @@
         var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
 
         var backGroundMusic; // Will be used for all the background music used in the game.
+        var jump = false, down = 0, up = 0;
         var jumpAction, idleAction, mixer = new THREE.AnimationMixer(); // Will be used to animate Richard's movements.
 
         manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
@@ -45,9 +44,9 @@
         };
         manager.onLoad = function ( ) {
             console.log( 'Loading complete!');
-            for (var s in bounds){
-                bounds[s].setFromObject(scene.getObjectByName(s))
-             };
+            // environment = [scene.getObjectByName("building-msb"),scene.getObjectByName("building-msl")/*,scene.getObjectByName("building-wss"),/*scene.getObjectByName("fountain"),*/
+            //                          /*scene.getObjectByName("building-labs")*/,scene.getObjectByName("circle-fixture"),scene.getObjectByName("stands")];
+            trajectoryRay.far = 0.1;
             requestAnimationFrame( render );
             render;
         };
@@ -136,6 +135,16 @@
             loader.load('./assets/environment-objects/scene.glb',function(gltf){
                 scene.add(gltf.scene)
             }); 
+            //load colliders
+            loader.load('./assets/environment-objects/scene-colliders.glb',function(gltf){
+                gltf.scene.children.forEach((object)=>{
+                    object.material.side = THREE.DoubleSide
+                    object.material.flatShading =  true
+                })
+                colliders.add(gltf.scene);
+                colliders.visible = false;
+                scene.add(colliders);
+            }); 
             //load character
             loader.load('./assets/characters/2richard2curious.glb',function(gltf){
                 mixer = new THREE.AnimationMixer(gltf.scene);
@@ -166,75 +175,145 @@
 
         var keymap = {};
         function move(keymap){
+            if (keymap[' '] && up == 0){
+                mixer.stopAllAction();
+                jump = !jump;
+                jumpAction.play();
+            }
+            if (down == 1){
+                mixer.stopAllAction();
+                character.position.y = 0
+                idleAction.play();
+            }
             mixer.update(level.walk_speed);
             
             var ghost = character.clone(); // moves ahead of the character to check for collision
             ghost.visible = false;
+
+            if (jump){
+                up++;
+            }
+            if (up == 15){
+                jump = !jump;
+                down = up;
+                up = 0;
+            }
+            if (down > 0){
+                down--;
+            }
                 
             if (keymap['w'] && keymap['d']){
                 ghost.translateZ(level.forward);
                 ghost.rotateY(level.right);
-                trajectoryRay.set(ghost.position,ghost.position.normalize());
-                if (trajectoryRay.intersectObjects(environment,true).length == 0){
+                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
                     character.translateZ(level.forward);
                     character.rotateY(level.right);
+                    if (jump){
+                        character.translateY(0.1);
+                    }
+                    if ( down > 0 ){
+                        character.translateY(-0.1);
+                    }
                 }
             }
             else if (keymap['w'] && keymap['a']){
                 ghost.translateZ(level.forward);
                 ghost.rotateY(level.left);
-                trajectoryRay.set(ghost.position,ghost.position.normalize());
-                if (trajectoryRay.intersectObjects(environment,true).length == 0){
+                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
                     character.translateZ(level.forward);
                     character.rotateY(level.left);
+                    if (jump){
+                        character.translateY(0.1);
+                    }
+                    if ( down > 0 && character.position.y > 0 ){
+                        character.translateY(-0.1);
+                    }
                 }
             }
             else if (keymap['s'] && keymap['d']){
                 ghost.translateZ(level.backward);
                 ghost.rotateY(level.right);
-                trajectoryRay.set(ghost.position,ghost.position.normalize());
-                if (trajectoryRay.intersectObjects(environment,true).length == 0){
+                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
                     character.translateZ(level.backward);
                     character.rotateY(level.right);
+                    if (jump){
+                        character.translateY(0.1);
+                    }
+                    if ( down > 0 ){
+                        character.translateY(-0.1);
+                    }
                 }
             }
             else if (keymap['s'] && keymap['a']){
                 ghost.translateZ(level.backward);
                 ghost.rotateY(level.left);
-                trajectoryRay.set(ghost.position,ghost.position.normalize());
-                if (trajectoryRay.intersectObjects(environment,true).length == 0){
+                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
                     character.translateZ(level.backward);
                     character.rotateY(level.left);
+                    if (jump){
+                        character.translateY(0.1);
+                    }
+                    if ( down > 0 ){
+                        character.translateY(-0.1);
+                    }
                 }
             }
             else if (keymap['w']){
                 ghost.translateZ(level.forward);
-                trajectoryRay.set(ghost.position,ghost.position.normalize());
-                console.log(bounds['stands'].intersectsRay(trajectoryRay));
-                character.translateZ(level.forward);
+                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                    character.translateZ(level.forward);
+                    if (jump){
+                        character.translateY(0.1);
+                    }
+                    if ( down > 0 ){
+                        character.translateY(-0.1);
+                    }
+                }
             }
             else if (keymap['s']){
                 ghost.translateZ(level.backward);
-                trajectoryRay.set(ghost.position,ghost.position.normalize());
-                if (trajectoryRay.intersectObjects(environment,true).length == 0){
+                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
                     character.translateZ(level.backward);
+                    if (jump){
+                        character.translateY(0.1);
+                    }
+                    if ( down > 0 ){
+                        character.translateY(-0.1);
+                    }
                 }
             }
             else if (keymap['a']){
                 ghost.rotateY(level.left);
-                trajectoryRay.set(ghost.position,ghost.position.normalize());
-                if (trajectoryRay.intersectObjects(environment,true).length == 0){
+                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
                     character.rotateY(level.left);
+                    if (jump){
+                        character.translateY(0.1);
+                    }
+                    if ( down > 0 ){
+                        character.translateY(-0.1);
+                    }
                 }
             }
             else if (keymap['d']){
                 character.rotateY(level.right);
-                trajectoryRay.set(ghost.position,ghost.position.normalize());
-                if (trajectoryRay.intersectObjects(environment,true).length == 0){
+                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
                     character.rotateY(level.right);
+                    if (jump){
+                        character.translateY(0.1);
+                    }
+                    if ( down > 0 ){
+                        character.translateY(-0.1);
+                    }
                 }
             }
-            // console.log((trajectoryRay.intersectObjects(environment,true)))
             character.updateWorldMatrix(true,true);
         }
     </script>
