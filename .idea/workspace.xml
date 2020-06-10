@@ -1,21 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b2aa2ebb-08de-4623-9894-4572702c301c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/game/CubeTextureLoader.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/game/assets/music-and-video/klein_wars_outro.mp4" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/game/skybox/negx.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/game/skybox/negy.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/game/skybox/negz.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/game/skybox/posx.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/game/skybox/posy.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/game/skybox/posz.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/game/skybox/readme.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/richard's-quest-level1.html" beforeDir="false" afterPath="$PROJECT_DIR$/game/richard's-quest-level1.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/richard's-quest-level2.html" beforeDir="false" afterPath="$PROJECT_DIR$/game/richard's-quest-level2.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/richard's-quest-level3.html" beforeDir="false" afterPath="$PROJECT_DIR$/game/richard's-quest-level3.html" afterDir="false" />
-    </list>
+    <list default="true" id="b2aa2ebb-08de-4623-9894-4572702c301c" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -43,7 +29,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/game/assets/music-and-video" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Labs/Lab9/CS424, Fall 2015, Lab 9_files/lab9.html" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -97,14 +83,22 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="260" y="0" key="CommitChangelistDialog2/0.0.1366.728@0.0.1366.728" timestamp="1590091785033" />
-    <state x="463" y="119" key="FileChooserDialogImpl" timestamp="1590093055136">
+    <state x="463" y="119" key="FileChooserDialogImpl" timestamp="1591820582428">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="463" y="119" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1590093055136" />
+    <state x="463" y="119" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1591820582428" />
     <state x="275" y="97" key="Vcs.Push.Dialog.v2" timestamp="1590091896325">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="275" y="97" key="Vcs.Push.Dialog.v2/0.0.1366.728@0.0.1366.728" timestamp="1590091896325" />
+    <state x="314" y="61" width="737" height="606" key="find.popup" timestamp="1591809449255">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state x="314" y="61" width="737" height="606" key="find.popup/0.0.1366.728@0.0.1366.728" timestamp="1591809449255" />
+    <state x="339" y="162" key="run.anything.popup" timestamp="1591818035598">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state x="339" y="162" key="run.anything.popup/0.0.1366.728@0.0.1366.728" timestamp="1591818035598" />
     <state x="346" y="49" width="672" height="678" key="search.everywhere.popup" timestamp="1590089651999">
       <screen x="0" y="0" width="1366" height="728" />
     </state>

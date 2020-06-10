@@ -1,16 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:position="http://www.w3.org/1999/xhtml" xmlns:bottom="http://www.w3.org/1999/xhtml"
+      xmlns:right="http://www.w3.org/1999/xhtml" xmlns:width="http://www.w3.org/1999/xhtml"
+      xmlns:height="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Richard's Very Bad Terrible No Good Morning</title>
-    <script src="three.js"></script>
-    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="scripts/three.js"></script>
+    <script src="scripts/GLTFLoader.js"></script>
 
     <script>
 
         "use strict";
 
-        var canvas, renderer, scene, camera; // Standard three.js requirements.
+        var canvas, mini, renderer, scene, camera, topCamera, miniMapRenderer; // Standard three.js requirements.
 
         var character = new THREE.Object3D(); // Will be used to store Richard and the cameras that follow him around (since he's so cool).
         var position = character.position; // Will be used to keep track of the character's position after each button press.
@@ -25,12 +28,15 @@
         var backGroundMusic; // Will be used for all the background music used in the game.
         var jumpAction, idleAction, mixer; // Will be used to animate Richard's movements.
 
+        var target = new THREE.Object3D(); // Need to make it an Object3D so that we can make it rotate on its own axis.
+
         /**
          *  The render function draws the scene.
          */
 
         function render() {
             renderer.render(scene, camera);
+            miniMapRenderer.render(scene, topCamera);
         }
 
         function sound(src) { // Used to add audio and background music into the game.
@@ -57,13 +63,18 @@
             renderer.setClearColor("white"); // Background color for scene.
             scene = new THREE.Scene();
 
-            camera = new THREE.PerspectiveCamera(45,canvas.width/canvas.height,0.1,200);
+            // Camera that follows the character
+            camera = new THREE.PerspectiveCamera(45, (window.innerWidth - 30)/(window.innerHeight - 250), 0.11, 200);
             var light = new THREE.DirectionalLight();   // A light shining from the direction of the camera; moves with the camera.
             light.position.set(0,0,1);
             camera.add(light);
             scene.add(new THREE.AmbientLight(0x404040));
             scene.add(new THREE.DirectionalLight(0xffffff,0.5)); // Dim light shining from above.
 
+            // Camera for the minimap (bird's eye view)
+            topCamera = new THREE.PerspectiveCamera(55, (window.innerWidth - 30)/(window.innerHeight - 250), 0.1, 1000);
+            topCamera.position.set(-34,50,39);
+            topCamera.lookAt(-34,0,39);
 
             // Put a close approximation of WSS ;) into the game.
             const loader = new THREE.GLTFLoader(); // to load models
@@ -72,7 +83,7 @@
             });
 
             // Make skybox Background
-            scene.background = new THREE.CubeTextureLoader().setPath('skybox/').load([
+            scene.background = new THREE.CubeTextureLoader().setPath('assets/skybox/').load([
                 'posx.jpg',
                 'negx.jpg',
                 'posy.jpg',
@@ -82,26 +93,32 @@
             ]);
 
             // Put Richard into the game.
-            loader.load('./assets/characters/richard_new.glb',function(gltf){
+            loader.load('./assets/characters/2richard2curious.glb',function(gltf){
                 mixer = new THREE.AnimationMixer(gltf.scene);
-                idleAction = mixer.clipAction(gltf.animations[1]);
-                jumpAction =  mixer.clipAction(gltf.animations[0]);
+                idleAction = mixer.clipAction(gltf.animations[0]);
+                jumpAction =  mixer.clipAction(gltf.animations[1]);
 
-                gltf.scene.scale.set(0.3,0.3,0.3);
+                gltf.scene.scale.set(0.1,0.1,0.1);
                 gltf.scene.rotation.set(0,-Math.PI,0);
 
                 character.add(gltf.scene);
                 character.position.set(-34,0,39);
                 camera.position.set(0,3,8);
+                topCamera.position.set(0,5,0);
                 character.add(camera);
-                idleAction.play(); // Animate Richard
-            });
-            scene.add(character);
+                character.add(topCamera);
 
-            // Put the target (Redbull can) into the game.
-            loader.load('./assets/coca-cola-bottle/coca-cola-bottle.glb',function(gltf){
-                gltf.scene.position.set(-28,1,-60);
-                scene.add(gltf.scene);
+                idleAction.play(); // Animate Richard
+                scene.add(character);
+            });
+
+            // Put the target (blue Energade bottle) into the game.
+            loader.load('./assets/environment-objects/coca-cola-bottle.glb',function(gltf){
+                target = gltf.scene;
+                target.rotation.set(0,0,Math.PI/8);
+                target.position.set(-28,2,-60);
+                scene.add(target);
+
             });
         }
 
@@ -114,6 +131,7 @@
 
         function updateForFrame() {
             mixer.update(0.01);
+            target.rotation.y += 0.05;
         }
 
         // ------------------- Initialise the timer and set it to the appropriate length ----------------------
@@ -305,12 +323,26 @@
          */
         function init() {
             try {
-                canvas = document.getElementById("glcanvas");
+                // Renderer for the main map (viewport1)
                 renderer = new THREE.WebGLRenderer({
                     canvas: canvas,
                     antialias: true,
                     alpha: false
                 });
+                renderer.setSize(window.innerWidth - 30, window.innerHeight - 250);
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMapSoft = true;
+                renderer.setClearColor("white");
+                document.getElementById('viewport1').appendChild(renderer.domElement);
+
+                // Renderer for the minimap (viewport2)
+                miniMapRenderer = new THREE.WebGLRenderer({
+                    canvas: mini,
+                    antialias: true,
+                    alpha: false
+                });
+                miniMapRenderer.setSize(window.innerWidth/5, window.innerHeight/5);
+                document.getElementById('viewport2').appendChild(miniMapRenderer.domElement);
             }
             catch (e) {
                 document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
@@ -343,8 +375,6 @@
 
 <h2>Richard's Very Bad Terrible No Good Morning</h2>
 
-
-
 <noscript>
     <p style="color: #AA0000; font-weight: bold">Sorry, but this page requires JavaScript!</p>
 </noscript>
@@ -356,13 +386,14 @@
 </p>
 <p>
     <button>Start Game</button>
-<div>Class starts in <span id="time"></span> but you're still slow and groggy. Go get a Redbull in the area between MSB and MSL to speed you up !!HURRY!</div>
+<div>Class starts in <span id="time"></span> but you're still slow and groggy. Go get a blue Energade in the area between MSB and MSL to speed you up !!HURRY!</div>
 <input type="button" value="First Person" onclick="return changeView(this);" />
 </p>
 
 <div id="canvas-holder" style="float:left; border: thin solid black; background-color: white">
-    <canvas width=1200 height=600 id="glcanvas"></canvas>
+    <div id="viewport1"></div>
+    <div id = "viewport2" style=" float: right; padding:0; margin: 0; height: 20%; bottom: 5px;
+    right: 1.5%; top: 72%; width: 20%; position: absolute"></div>
 </div>
-
 </body>
 </html>
