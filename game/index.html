@@ -9,7 +9,6 @@
 
     <script src="./scripts/three.js"></script>
     <script src="./scripts/GLTFLoader.js"></script>
-    <script src="./scripts/timer.js"></script>
 
     <script type="module">
         import * as LEVELS from './scripts/levels.js';
@@ -34,8 +33,9 @@
         var animating = false;  // Set to true when an animation is in progress.
         var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
 
-        var backGroundMusic; // Will be used for all the background music used in the game.
+        var backgroundMusic; // Will be used for all the background music used in the game.
         var jump = false, down = 0, up = 0;
+        var display, timer, timeObj; // for time-keeping
         var jumpAction, idleAction, mixer = new THREE.AnimationMixer(); // Will be used to animate Richard's movements.
 
         manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
@@ -54,265 +54,373 @@
             console.log( 'There was an error loading ' + url );
         };
 
-    window.onload = function() {
-            level.setup();
-
-            //
-
-            //timer initialisation
-            var display = document.querySelector('#time'),
-            timer = new CountDownTimer(5),
-            timeObj = CountDownTimer.parse(5);
-            
-            display.textContent = format(timeObj.minutes, timeObj.seconds);
-            timer.onTick(format);
-
-            document.querySelector('button').addEventListener('click', function () {
-                timer.start();
-                document.addEventListener("keydown", function(ev){
-                    keymap[ev.key] = ev.type == 'keydown';
-                    move(keymap);
-                }, false);
-                document.addEventListener("keyup",function(ev){
-                    keymap[ev.key] = ev.type == 'keydown';
-                    move(keymap);
-                }, false);
-            });
-
-            //renderer
-            try {
-                    renderer = new THREE.WebGLRenderer({
-                        antialias: true,
-                        alpha: true
-                    });
-                    renderer.setSize(window.innerWidth - 100, window.innerHeight - 300);
-                    renderer.shadowMap.enabled = true;
-                    renderer.shadowMapSoft = true;
-                    renderer.setClearColor("white");
-                    document.getElementById( 'viewport' ).appendChild( renderer.domElement );
-                }
-                catch (e) {
-                    document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
-                        e + "</b>";
-                    return;
-                }
-            
-            //scene
-            scene = new THREE.Scene();
-            
-            //camera
-            camera = new THREE.PerspectiveCamera(
-                45,
-                (window.innerWidth - 100)/(window.innerHeight - 300),
-                0.11,
-                200
-            );
-
-            //lights
-            light = new THREE.DirectionalLight( 0xFFFFFF );
-            light.position.set(0,0,1);
-            scene.add( new THREE.AmbientLight( 0x404040 ) );
-            scene.add( new THREE.DirectionalLight( 0xffffff, 0.5 ) );   
-            
-            camera.add(light);
-            // character.add(camera);
-            
-            //loader
-            loader = new THREE.GLTFLoader(manager);
-            //load skybox
-            scene.background = new THREE.CubeTextureLoader().setPath('./assets/skybox/').load([
-                'posx.jpg',
-                'negx.jpg',
-                'posy.jpg',
-                'negy.jpg',
-                'posz.jpg',
-                'negz.jpg'
-            ]);
-            //load scene
-            loader.load('./assets/environment-objects/scene.glb',function(gltf){
-                scene.add(gltf.scene)
-            }); 
-            //load colliders
-            loader.load('./assets/environment-objects/scene-colliders.glb',function(gltf){
-                gltf.scene.children.forEach((object)=>{
-                    object.material.side = THREE.DoubleSide
-                    object.material.flatShading =  true
-                })
-                colliders.add(gltf.scene);
-                colliders.visible = false;
-                scene.add(colliders);
-            }); 
-            //load character
-            loader.load('./assets/characters/2richard2curious.glb',function(gltf){
-                mixer = new THREE.AnimationMixer(gltf.scene);
-                idleAction = mixer.clipAction(gltf.animations[0]);
-                jumpAction =  mixer.clipAction(gltf.animations[1]);
-
-                gltf.scene.scale.set(0.1,0.1,0.1);
-                gltf.scene.rotation.set(0,-Math.PI,0);
-
-                character.add(gltf.scene);
-                character.position.set(-34,0,39);
-                camera.position.set(0,3,8);
-                character.add(camera);
-                idleAction.play(); // Animate Richard
-                scene.add(character);
-            }); 
-            //load target object
-            loader.load('./assets/environment-objects/coca-cola-bottle.glb', function(gltf){
-                gltf.scene.children[2].position.set(-28,2,-60);
-                scene.add(gltf.scene.children[2]);
-            });        
-        };
-
-        render = function() {
-            requestAnimationFrame(render);
-            renderer.render(scene,camera);
-        };
-
-        var keymap = {};
-        function move(keymap){
-            if (keymap[' '] && up == 0){
-                mixer.stopAllAction();
-                jump = !jump;
-                jumpAction.play();
+        function sound(src) { // Used to add audio and background music into the game.
+            this.sound = document.createElement("audio");
+            this.sound.src = src;
+            this.sound.setAttribute("preload", "auto");
+            this.sound.setAttribute("controls", "none");
+            this.sound.style.display = "none";
+            document.body.appendChild(this.sound);
+            this.play = function(){
+                this.sound.play();
+            };
+            this.stop = function(){
+                this.sound.pause();
             }
-            if (down == 1){
-                mixer.stopAllAction();
-                character.position.y = 0
-                idleAction.play();
-            }
-            mixer.update(level.walk_speed);
-            
-            var ghost = character.clone(); // moves ahead of the character to check for collision
-            ghost.visible = false;
-
-            if (jump){
-                up++;
-            }
-            if (up == 15){
-                jump = !jump;
-                down = up;
-                up = 0;
-            }
-            if (down > 0){
-                down--;
-            }
-                
-            if (keymap['w'] && keymap['d']){
-                ghost.translateZ(level.forward);
-                ghost.rotateY(level.right);
-                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
-                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
-                    character.translateZ(level.forward);
-                    character.rotateY(level.right);
-                    if (jump){
-                        character.translateY(0.1);
-                    }
-                    if ( down > 0 ){
-                        character.translateY(-0.1);
-                    }
-                }
-            }
-            else if (keymap['w'] && keymap['a']){
-                ghost.translateZ(level.forward);
-                ghost.rotateY(level.left);
-                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
-                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
-                    character.translateZ(level.forward);
-                    character.rotateY(level.left);
-                    if (jump){
-                        character.translateY(0.1);
-                    }
-                    if ( down > 0 && character.position.y > 0 ){
-                        character.translateY(-0.1);
-                    }
-                }
-            }
-            else if (keymap['s'] && keymap['d']){
-                ghost.translateZ(level.backward);
-                ghost.rotateY(level.right);
-                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
-                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
-                    character.translateZ(level.backward);
-                    character.rotateY(level.right);
-                    if (jump){
-                        character.translateY(0.1);
-                    }
-                    if ( down > 0 ){
-                        character.translateY(-0.1);
-                    }
-                }
-            }
-            else if (keymap['s'] && keymap['a']){
-                ghost.translateZ(level.backward);
-                ghost.rotateY(level.left);
-                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
-                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
-                    character.translateZ(level.backward);
-                    character.rotateY(level.left);
-                    if (jump){
-                        character.translateY(0.1);
-                    }
-                    if ( down > 0 ){
-                        character.translateY(-0.1);
-                    }
-                }
-            }
-            else if (keymap['w']){
-                ghost.translateZ(level.forward);
-                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
-                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
-                    character.translateZ(level.forward);
-                    if (jump){
-                        character.translateY(0.1);
-                    }
-                    if ( down > 0 ){
-                        character.translateY(-0.1);
-                    }
-                }
-            }
-            else if (keymap['s']){
-                ghost.translateZ(level.backward);
-                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
-                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
-                    character.translateZ(level.backward);
-                    if (jump){
-                        character.translateY(0.1);
-                    }
-                    if ( down > 0 ){
-                        character.translateY(-0.1);
-                    }
-                }
-            }
-            else if (keymap['a']){
-                ghost.rotateY(level.left);
-                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
-                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
-                    character.rotateY(level.left);
-                    if (jump){
-                        character.translateY(0.1);
-                    }
-                    if ( down > 0 ){
-                        character.translateY(-0.1);
-                    }
-                }
-            }
-            else if (keymap['d']){
-                character.rotateY(level.right);
-                trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
-                if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
-                    character.rotateY(level.right);
-                    if (jump){
-                        character.translateY(0.1);
-                    }
-                    if ( down > 0 ){
-                        character.translateY(-0.1);
-                    }
-                }
-            }
-            character.updateWorldMatrix(true,true);
         }
+        function changeView(el) { // This will be used to change the view from first to second person.
+            if (el.value === "First Person" ){
+                el.value = "Third Person";
+                camera.translateZ(-9);
+                camera.translateY(-1);
+            }
+            else{
+                el.value = "First Person";
+                camera.translateZ(9);
+                camera.translateY(1);
+            }
+        }
+
+        //timer initialisation
+        function CountDownTimer(duration, granularity) {
+            this.duration = duration;
+            this.granularity = granularity || 1000;
+            this.tickFtns = [];
+            this.running = false;
+        }
+
+        CountDownTimer.prototype.start = function() {
+            if (this.running) {
+                return;
+            }
+            this.running = true;
+            var start = Date.now(),
+                that = this,
+                diff, obj;
+
+            (function timer() {
+                diff = that.duration - (((Date.now() - start) / 1000) | 0);
+
+                if (diff > 0) {
+                    setTimeout(timer, that.granularity);
+                } else {
+                    diff = 0;
+                    that.running = false;
+                }
+
+                obj = CountDownTimer.parse(diff);
+                that.tickFtns.forEach(function(ftn) {
+                    ftn.call(this, obj.minutes, obj.seconds);
+                }, that);
+            }());
+        };
+
+        CountDownTimer.prototype.onTick = function(ftn) {
+            if (typeof ftn === 'function') {
+                this.tickFtns.push(ftn);
+            }
+            return this;
+        };
+
+        CountDownTimer.prototype.expired = function() {
+            return !this.running;
+        };
+
+        CountDownTimer.parse = function(seconds) {
+            return {
+                'minutes': (seconds / 60) | 0,
+                'seconds': (seconds % 60) | 0
+            };
+        };
+
+        function format(minutes, seconds) {
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+            display.textContent = minutes + ':' + seconds;
+            //var run = document.getElementById("animateCheckbox").checked;
+            if (minutes== 0 && seconds == 0){
+                if (confirm("Oh no! You were late for class, and now all the third years are going to fail! Do you want to restart?")) {
+                    location.reload()
+                } else {
+                    location.assign("./assets/music-and-video/video.mp4");
+                }
+            }
+        }
+
+        window.onload = function() {
+                level.setup();
+
+                //load music initial music
+                backgroundMusic = new sound(level.music_src);
+
+                //timer
+                display = document.querySelector('#time');
+                timer = new CountDownTimer(135);
+                timeObj = CountDownTimer.parse(135);
+
+                format(timeObj.minutes, timeObj.seconds);
+                timer.onTick(format);
+
+
+                document.querySelector('button').addEventListener('click', function () {
+                    timer.start();
+                    backgroundMusic.play();
+                    document.addEventListener("keydown", function(ev){
+                        keymap[ev.key] = ev.type == 'keydown';
+                        move(keymap);
+                    }, false);
+                    document.addEventListener("keyup",function(ev){
+                        keymap[ev.key] = ev.type == 'keydown';
+                        move(keymap);
+                    }, false);
+                });
+
+                //renderer
+                try {
+                        renderer = new THREE.WebGLRenderer({
+                            antialias: true,
+                            alpha: true
+                        });
+                        renderer.setSize(window.innerWidth - 100, window.innerHeight - 300);
+                        renderer.shadowMap.enabled = true;
+                        renderer.shadowMapSoft = true;
+                        renderer.setClearColor("white");
+                        document.getElementById( 'viewport' ).appendChild( renderer.domElement );
+                    }
+                    catch (e) {
+                        document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
+                            e + "</b>";
+                        return;
+                    }
+                
+                //scene
+                scene = new THREE.Scene();
+                
+                //camera
+                camera = new THREE.PerspectiveCamera(
+                    45,
+                    (window.innerWidth - 100)/(window.innerHeight - 300),
+                    0.11,
+                    200
+                );
+
+                //lights
+                light = new THREE.DirectionalLight( 0xFFFFFF );
+                light.position.set(0,0,1);
+                scene.add( new THREE.AmbientLight( 0x404040 ) );
+                scene.add( new THREE.DirectionalLight( 0xffffff, 0.5 ) );   
+                
+                camera.add(light);
+                // character.add(camera);
+                
+                //loader
+                loader = new THREE.GLTFLoader(manager);
+                //load skybox
+                scene.background = new THREE.CubeTextureLoader().setPath('./assets/skybox/').load([
+                    'posx.jpg',
+                    'negx.jpg',
+                    'posy.jpg',
+                    'negy.jpg',
+                    'posz.jpg',
+                    'negz.jpg'
+                ]);
+                //load scene
+                loader.load('./assets/environment-objects/scene.glb',function(gltf){
+                    scene.add(gltf.scene)
+                }); 
+                //load colliders
+                loader.load('./assets/environment-objects/scene-colliders.glb',function(gltf){
+                    gltf.scene.children.forEach((object)=>{
+                        object.material.side = THREE.DoubleSide
+                        object.material.flatShading =  true
+                    })
+                    colliders.add(gltf.scene);
+                    colliders.visible = false;
+                    scene.add(colliders);
+                }); 
+                //load character
+                loader.load('./assets/characters/2richard2curious.glb',function(gltf){
+                    mixer = new THREE.AnimationMixer(gltf.scene);
+                    idleAction = mixer.clipAction(gltf.animations[0]);
+                    jumpAction =  mixer.clipAction(gltf.animations[1]);
+
+                    gltf.scene.scale.set(0.1,0.1,0.1);
+                    gltf.scene.rotation.set(0,-Math.PI,0);
+
+                    character.add(gltf.scene);
+                    character.position.set(-34,0,39);
+                    camera.position.set(0,3,8);
+                    character.add(camera);
+                    idleAction.play(); // Animate Richard
+                    scene.add(character);
+                }); 
+                //load target object
+                loader.load('./assets/environment-objects/coca-cola-bottle.glb', function(gltf){
+                    gltf.scene.children[2].position.set(-28,2,-60);
+                    scene.add(gltf.scene.children[2]);
+                });        
+            };
+
+            render = function() {
+                requestAnimationFrame(render);
+                renderer.render(scene,camera);
+            };
+
+            var keymap = {};
+            function move(keymap){
+                if (keymap[' '] && up == 0){
+                    idleAction.stop();
+                    jump = !jump;
+                    jumpAction.reset();
+                }
+                if (down == 1){
+                    jumpAction.stop();
+                    character.position.y = 0
+                    idleAction.play();
+                }
+                mixer.update(level.walk_speed);
+                
+                var ghost = character.clone(); // moves ahead of the character to check for collision
+                ghost.visible = false;
+
+                if (jump){
+                    up++;
+                }
+                if (up == 15){
+                    jump = !jump;
+                    down = up;
+                    up = 0;
+                }
+                if (down > 0){
+                    down--;
+                }
+
+                // console.log(timer,timeObj)
+
+                    
+                if (keymap['w'] && keymap['d']){
+                    ghost.translateZ(level.forward());
+                    ghost.rotateY(level.right);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(level.forward());
+                        character.rotateY(level.right);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['w'] && keymap['a']){
+                    ghost.translateZ(level.forward());
+                    ghost.rotateY(level.left);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(level.forward());
+                        character.rotateY(level.left);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 && character.position.y > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['s'] && keymap['d']){
+                    ghost.translateZ(level.backward());
+                    ghost.rotateY(level.right);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(level.backward());
+                        character.rotateY(level.right);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['s'] && keymap['a']){
+                    ghost.translateZ(level.backward());
+                    ghost.rotateY(level.left);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(level.backward());
+                        character.rotateY(level.left);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['w']){
+                    ghost.translateZ(level.forward());
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(level.forward());
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['s']){
+                    ghost.translateZ(level.backward());
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(level.backward());
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['a']){
+                    ghost.rotateY(level.left);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.rotateY(level.left);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['d']){
+                    character.rotateY(level.right);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.rotateY(level.right);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+
+                if(character.position.distanceToSquared(level.target_position) < 5){
+                    level.next();
+
+                    backgroundMusic.sound.src = level.music_src;
+
+                    backgroundMusic.play();
+                    character.position.set(level.character_position.x,level.character_position.y,level.character_position.z);
+                    scene.getObjectByName('coca-cola-bottle').position.set(level.target_position.x,level.target_position.y,level.target_position.z);
+                }
+            }
     </script>
 </head>
 
