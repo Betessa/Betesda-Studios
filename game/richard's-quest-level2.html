@@ -36,6 +36,13 @@
 
         var target = new THREE.Object3D(); // Need to make it an Object3D so that we can make it rotate on its own axis.
 
+        var ambient= new THREE.AmbientLight(0x404040,3 );
+        var mouse = new THREE.Vector2(0,0);
+        var prevMouse = new THREE.Vector2(0,0);
+        var targetCamera = new THREE.Vector3();
+        var conditionX = false;
+        var conditionY= false;
+
         // defines actions for all the manager's events
         manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
             console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
@@ -59,6 +66,18 @@
          */
 
         function render() {
+            if(conditionX){
+                targetCamera.y = ( 1 - mouse.y ) * 0.001;
+                targetCamera.z=position.z;
+                camera.rotateX( 0.025 * ( targetCamera.y));
+                conditionX = false;
+            }
+            if(conditionY){
+                targetCamera.x = ( 1 - mouse.x ) * 0.001;
+                targetCamera.z=position.z;
+                camera.rotateY(0.025 * ( targetCamera.x));
+                conditionY = false;
+            }
             renderer.render(scene, camera);
             miniMapRenderer.render(scene, topCamera);
         }
@@ -89,11 +108,7 @@
 
             // Camera that follows the character
             camera = new THREE.PerspectiveCamera(45, (window.innerWidth - 30)/(window.innerHeight - 250), 0.11, 200);
-            var light = new THREE.DirectionalLight();   // A light shining from the direction of the camera; moves with the camera.
-            light.position.set(0,0,1);
-            camera.add(light);
-            character.add(camera);
-            scene.add(new THREE.AmbientLight(0x404040));
+            scene.add(ambient);
             scene.add(new THREE.DirectionalLight(0xffffff,0.5)); // Dim light shining from above.
 
             // Camera for the minimap (bird's eye view)
@@ -149,7 +164,7 @@
             });
 
             // Put the target (turqoise sparkling water bottle) into the game.
-            loader.load('./assets/environment-objects/coca-cola-bottle.glb',function(gltf){
+            loader.load('./assets/environment-objects/coca-cola-bottle(2).glb',function(gltf){
                 target = gltf.scene;
                 target.rotation.set(0,0,Math.PI/8);
                 target.position.set(-62,2,-3);
@@ -252,6 +267,19 @@
             }
             init();
         };
+        //This function check for movement in the mouse. The Conditons makes sure the camera doesn't keep rotating if there isn't mouse movement
+        function onMouseMove( event ){
+	        mouse.x = ( event.clientX - (window.innerWidth/2) );
+	        mouse.y = ( event.clientY -(window.innerHeight/2) );
+            if(mouse.x != prevMouse.x){
+                conditionY = true;
+                prevMouse.x=mouse.x;
+            }
+            if(mouse.y != prevMouse.y){
+                conditionX = true;
+                prevMouse.y = mouse.y;
+            }
+        }
 
         /**
          *  This function is called responsible for all movement within the game. After a movement
@@ -448,6 +476,7 @@
                 });
                 miniMapRenderer.setSize(window.innerWidth/5, window.innerHeight/5);
                 document.getElementById('viewport2').appendChild(miniMapRenderer.domElement);
+                window.addEventListener( 'mousemove', onMouseMove, false );
             }
             catch (e) {
                 document.getElementById("message").innerHTML="<b>Sorry, an error occurred:<br>" +
