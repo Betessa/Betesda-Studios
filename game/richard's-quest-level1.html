@@ -14,10 +14,15 @@
         "use strict";
 
         var canvas, mini, renderer, scene, camera, topCamera, miniMapRenderer; // Standard three.js requirements.
+       
+        var trajectoryRay = new THREE.Raycaster(); // a ray will be cast in the direction of movement. If it intersects an object, that's a collision.
+        var colliders = new THREE.Group(); // all environment objects in the scene
 
         var character = new THREE.Object3D(); // Will be used to store Richard and the cameras that follow him around (since he's so cool).
         var position = character.position; // Will be used to keep track of the character's position after each button press.
         var distanceBetween = new THREE.Vector3(); // Will be used to keep track of the distance between Richard and his target/goal.
+       
+        var manager = new THREE.LoadingManager(); // To reassure Karen that all the assets are loaded
 
         var destination1 = new THREE.Vector3(-28,0,-60); // The area between MSB and MSL.
         var level = 1; // Set to the first level of the game and update where appropriate.
@@ -26,9 +31,28 @@
         var frameNumber = 0;  // Frame number is advanced by 1 for each frame while animating.
 
         var backGroundMusic; // Will be used for all the background music used in the game.
+        var jump = false, down = 0, up = 0;
         var jumpAction, idleAction, mixer; // Will be used to animate Richard's movements.
 
         var target = new THREE.Object3D(); // Need to make it an Object3D so that we can make it rotate on its own axis.
+
+        // defines actions for all the manager's events
+        manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+            console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+        };
+        manager.onLoad = function ( ) {
+            console.log( 'Loading complete!');
+            trajectoryRay.far = 0.1;
+            requestAnimationFrame( render );
+            render;
+            document.getElementById('start').enabled = true;
+        };
+        manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+            console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+        };
+        manager.onError = function ( url ) {
+            console.log( 'There was an error loading ' + url );
+        };
 
         /**
          *  The render function draws the scene.
@@ -55,7 +79,7 @@
         }
 
         function firstLevel(){ // Will be the "default" state/level of the game.
-
+            document.getElementById('start').enabled = false;
             backGroundMusic = new sound("./assets/music-and-video/Sonic Theme.mp3");
 
             // ------------------- Make a camera with viewpoint light ----------------------
@@ -77,10 +101,20 @@
             topCamera.lookAt(-34,0,39);
 
             // Put a close approximation of WSS ;) into the game.
-            const loader = new THREE.GLTFLoader(); // to load models
+            const loader = new THREE.GLTFLoader(manager) // to load models
             loader.load('./assets/environment-objects/scene.glb',function(gltf){
                 scene.add(gltf.scene);
             });
+            //load colliders
+            loader.load('./assets/environment-objects/scene-colliders.glb',function(gltf){
+                gltf.scene.children.forEach((object)=>{
+                    object.material.side = THREE.DoubleSide
+                    object.material.flatShading =  true
+                })
+                colliders.add(gltf.scene);
+                colliders.visible = false;
+                scene.add(colliders);
+            }); 
 
             // Make skybox Background
             scene.background = new THREE.CubeTextureLoader().setPath('assets/skybox/').load([
@@ -130,7 +164,6 @@
          */
 
         function updateForFrame() {
-            mixer.update(0.01);
             target.rotation.y += 0.05;
         }
 
@@ -229,78 +262,150 @@
 
         var keymap = {};
         function move(keymap){ // Will be used to move Richard.
-            var code = event.keyCode;
-            if (level == 1){
-                if (keymap['w'] && keymap['d']){ // move forward and turn right
-                    character.translateZ(-0.1);
+            if (keymap[' '] && up == 0){
+                    idleAction.stop();
+                    jump = !jump;
+                    jumpAction.reset();
+                }
+                if (down == 1){
+                    jumpAction.stop();
+                    character.position.y = 0
+                    idleAction.play();
+                }
+                mixer.update(0.1);
+                
+                var ghost = character.clone(); // moves ahead of the character to check for collision
+                ghost.visible = false;
+
+                if (jump){
+                    up++;
+                }
+                if (up == 15){
+                    jump = !jump;
+                    down = up;
+                    up = 0;
+                }
+                if (down > 0){
+                    down--;
+                }
+                    
+                if (keymap['w'] && keymap['d']){
+                    ghost.translateZ(-0.1);
+                    ghost.rotateY(-Math.PI/2250);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(-0.1);
+                        character.rotateY(-Math.PI/2250);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['w'] && keymap['a']){
+                    ghost.translateZ(-0.1);
+                    ghost.rotateY(Math.PI/2250);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(-0.1);
+                        character.rotateY(Math.PI/2250);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 && character.position.y > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['s'] && keymap['d']){
+                    ghost.translateZ(0.1);
+                    ghost.rotateY(-Math.PI/2250);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(0.1);
+                        character.rotateY(-Math.PI/2250);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['s'] && keymap['a']){
+                    ghost.translateZ(0.1);
+                    ghost.rotateY(Math.PI/2250);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(0.1);
+                        character.rotateY(Math.PI/2250);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['w']){
+                    ghost.translateZ(-0.1);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(-0.1);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['s']){
+                    ghost.translateZ(0.1);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.translateZ(0.1);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['a']){
+                    ghost.rotateY(Math.PI/2250);
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.rotateY(Math.PI/2250);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
+                    }
+                }
+                else if (keymap['d']){
                     character.rotateY(-Math.PI/2250);
-                    distanceBetween = position.manhattanDistanceTo(destination1);
-                    if (distanceBetween < 2) {
-                        console.log("hit");
-                        location.assign("richard's-quest-level2.html");
+                    trajectoryRay.set(ghost.position,new THREE.Vector3(1,0,1));
+                    if (trajectoryRay.intersectObjects(colliders.getObjectByName('Scene').children,true).length == 0){
+                        character.rotateY(-Math.PI/2250);
+                        if (jump){
+                            character.translateY(0.1);
+                        }
+                        if ( down > 0 ){
+                            character.translateY(-0.1);
+                        }
                     }
                 }
-                else if (keymap['w'] && keymap['a']){ //move forward and turn left
-                    character.translateZ(-0.1);
-                    character.rotateY(Math.PI/2250);
-                    distanceBetween = position.manhattanDistanceTo(destination1);
-                    if (distanceBetween < 2) {
-                        console.log("hit");
-                        location.assign("richard's-quest-level2.html");
-                    }
-                }
-                else if (keymap['s'] && keymap['d']){ // move backward and turn right
-                    character.translateZ(-0.1);
-                    character.rotateY(-Math.PI/2250);
-                    distanceBetween = position.manhattanDistanceTo(destination1);
-                    if (distanceBetween < 2) {
-                        console.log("hit");
-                        location.assign("richard's-quest-level2.html");
-                    }
-                }
-                else if (keymap['s'] && keymap['a']){ // move backward and turn left
-                    character.translateZ(-0.1);
-                    character.rotateY(Math.PI/2250);
-                    distanceBetween = position.manhattanDistanceTo(destination1);
-                    if (distanceBetween < 2) {
-                        console.log("hit");
-                        location.assign("richard's-quest-level2.html");
-                    }
-                }
-                else if (keymap['w']){ // move forward
-                    character.translateZ(-0.1);
-                    distanceBetween = position.manhattanDistanceTo(destination1);
-                    if (distanceBetween < 2) {
-                        console.log("hit");
-                        location.assign("richard's-quest-level2.html");
-                    }
-                }
-                else if (keymap['s']){ // move backward
-                    character.translateZ(0.1);
-                    distanceBetween = position.manhattanDistanceTo(destination1);
-                    if (distanceBetween < 2) {
-                        console.log("hit");
-                        location.assign("richard's-quest-level2.html");
-                    }
-                }
-                else if (keymap['a']){ // turn right
-                    character.rotateY(Math.PI/2250); // Was originally set to -Math.PI/100
-                    distanceBetween = position.manhattanDistanceTo(destination1);
-                    if (distanceBetween < 2) {
-                        console.log("hit");
-                        location.assign("richard's-quest-level2.html");
-                    }
-                }
-                else if (keymap['d']){ // turn left
-                    character.rotateY(-Math.PI/2250); // Was originally set to -Math.PI/100
-                    distanceBetween = position.manhattanDistanceTo(destination1);
-                    if (distanceBetween < 2) {
-                        console.log("hit");
-                        location.assign("richard's-quest-level2.html");
-                    }
+
+                if(character.position.distanceToSquared(destination1) < 5){
+                    location.assign("richard's-quest-level2.html");
                 }
             }
-        }
 
         /*  Drives the animation, called by system through requestAnimationFrame() */
 
@@ -385,7 +490,7 @@
     Richard has overslept and needs to collect all the essentials and get to the CGV lecture fast!	&#128564
 </p>
 <p>
-    <button>Start Game</button>
+    <button id="start">Start Game</button>
 <div>Class starts in <span id="time"></span> but you're still slow and groggy. Go get a blue Energade in the area between MSB and MSL to speed you up !!HURRY!</div>
 <input type="button" value="First Person" onclick="return changeView(this);" />
 </p>
