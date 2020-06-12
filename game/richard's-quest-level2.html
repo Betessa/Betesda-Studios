@@ -510,13 +510,12 @@
         function changeView(el) { // This will be used to change the view from first to second person.
             if (el.value === "First Person" ){
                 el.value = "Third Person";
-                camera.translateZ(-9);
-                camera.translateY(-1);
+                camera.position.set(0,3,0);
             }
             else{
                 el.value = "First Person";
-                camera.translateZ(9);
-                camera.translateY(1);
+                camera.position.set(0,3,8);
+            }camera.translateY(1);
             }
         }
 
