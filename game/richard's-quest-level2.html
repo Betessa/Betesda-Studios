@@ -39,7 +39,7 @@
         var ambient= new THREE.AmbientLight(0x404040,3 );
         var mouse = new THREE.Vector2(0,0);
         var prevMouse = new THREE.Vector2(0,0);
-        var targetCamera = new THREE.Vector3();
+        var targetCamera = new THREE.Vector3(0,0,0);
         var conditionX = false;
         var conditionY= false;
 
@@ -48,11 +48,39 @@
             console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
         };
         manager.onLoad = function ( ) {
+            var display = document.querySelector('#time'),
+                timer = new CountDownTimer(15),
+                timeObj = CountDownTimer.parse(15);
+
+            format(timeObj.minutes, timeObj.seconds);
+            timer.onTick(format);
+
+            function format(minutes, seconds) {
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                display.textContent = minutes + ':' + seconds;
+                //var run = document.getElementById("animateCheckbox").checked;
+                if (minutes== 0 && seconds == 0){
+                    if (confirm("Oh no! You were late for class, and now all the third years are going to fail! Do you want to restart?")) {
+                        location.reload()
+                    } else {
+                        location.assign("./assets/music-and-video/video.mp4");
+                    }
+                }
+            }
+
             console.log( 'Loading complete!');
             trajectoryRay.far = 1;
             requestAnimationFrame( render );
             render;
-            document.getElementById('start').enabled = true;
+            
+            document.querySelector('button').addEventListener('click', function () {
+                timer.start();
+                animating = true;
+                if (animating) {
+                    requestAnimationFrame(doFrame);
+                }
+            });
         };
         manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
             console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
@@ -67,16 +95,33 @@
 
         function render() {
             if(conditionX){
-                targetCamera.y = ( 1 - mouse.y ) * 0.001;
-                targetCamera.z=position.z;
-                camera.rotateX( 0.025 * ( targetCamera.y));
-                conditionX = false;
+                if(character.position.x - mouse.x < 0 && camera.rotation.y > -0.4){
+                    targetCamera.x = ( 1 - mouse.x ) * 0.001;
+                    targetCamera.z=position.z;
+                    camera.rotateY( 0.025 * ( targetCamera.x));
+                    conditionX = false;
+                }
+                else if (character.position.x - mouse.x >= 0 && camera.rotation.y < 0.4){
+                    targetCamera.x = ( 1 + mouse.x ) * 0.001;
+                    targetCamera.z=position.z;
+                    camera.rotateY( -0.025 * ( targetCamera.x));
+                    conditionX = false;
+                }
+
             }
             if(conditionY){
-                targetCamera.x = ( 1 - mouse.x ) * 0.001;
-                targetCamera.z=position.z;
-                camera.rotateY(0.025 * ( targetCamera.x));
-                conditionY = false;
+                if ((mouse.y - 350) < 0 && camera.rotation.y > -0.2){
+                    targetCamera.y = ( 1 + mouse.y - 350) * 0.001;
+                    targetCamera.z=position.z;
+                    camera.rotateX( -0.025 * ( targetCamera.y));
+                    conditionX = false;
+                }
+                else if ((mouse.y - 350) >= 0  && camera.rotation.y < 0.2){
+                    targetCamera.y = ( 1 - mouse.y - 350 ) * 0.001;
+                    targetCamera.z=position.z;
+                    camera.rotateX( 0.025 * ( targetCamera.y));
+                    conditionX = false;
+                }
             }
             renderer.render(scene, camera);
             miniMapRenderer.render(scene, topCamera);
@@ -98,7 +143,6 @@
         }
 
         function secondLevel(){ // Will be the second state/level of the game. Update the positions of the camera and character as required.
-            document.getElementById('start').enabled = false;
             backGroundMusic = new sound("./assets/music-and-video/Doom Theme.mp3");
 
             // ------------------- Make a camera with viewpoint light ----------------------
@@ -238,45 +282,19 @@
 
         // Update timer and timeObj to set the timer to the appropriate length.
         window.onload = function(){
-            var display = document.querySelector('#time'),
-                timer = new CountDownTimer(15),
-                timeObj = CountDownTimer.parse(15);
-
-            format(timeObj.minutes, timeObj.seconds);
-            timer.onTick(format);
-            document.querySelector('button').addEventListener('click', function () {
-                timer.start();
-                animating = true;
-                if (animating) {
-                    requestAnimationFrame(doFrame);
-                }
-            });
-
-            function format(minutes, seconds) {
-                minutes = minutes < 10 ? "0" + minutes : minutes;
-                seconds = seconds < 10 ? "0" + seconds : seconds;
-                display.textContent = minutes + ':' + seconds;
-                //var run = document.getElementById("animateCheckbox").checked;
-                if (minutes== 0 && seconds == 0){
-                    if (confirm("Oh no! You were late for class, and now all the third years are going to fail! Do you want to restart?")) {
-                        location.reload()
-                    } else {
-                        location.assign("./assets/music-and-video/video.mp4");
-                    }
-                }
-            }
+            
             init();
         };
         //This function check for movement in the mouse. The Conditons makes sure the camera doesn't keep rotating if there isn't mouse movement
         function onMouseMove( event ){
-	        mouse.x = ( event.clientX - (window.innerWidth/2) );
-	        mouse.y = ( event.clientY -(window.innerHeight/2) );
-            if(mouse.x != prevMouse.x){
-                conditionY = true;
+	        mouse.x = event.clientX  - window.innerWidth/2 + 65;
+	        mouse.y = event.clientY - window.innerHeight/2 + 200;
+            if(Math.abs(mouse.x - prevMouse.x) > 10 && mouse.y > 0){
+                conditionX = true;
                 prevMouse.x=mouse.x;
             }
-            if(mouse.y != prevMouse.y){
-                conditionX = true;
+            if(Math.abs(mouse.y - prevMouse.y) > 10  && mouse.y > 0){
+                conditionY = true;
                 prevMouse.y = mouse.y;
             }
         }
