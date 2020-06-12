@@ -114,13 +114,13 @@
                     targetCamera.y = ( 1 + mouse.y - 350) * 0.001;
                     targetCamera.z=position.z;
                     camera.rotateX( -0.025 * ( targetCamera.y));
-                    conditionX = false;
+                    conditionY = false;
                 }
                 else if ((mouse.y - 350) >= 0  && camera.rotation.y < 0.2){
                     targetCamera.y = ( 1 - mouse.y - 350 ) * 0.001;
                     targetCamera.z=position.z;
                     camera.rotateX( 0.025 * ( targetCamera.y));
-                    conditionX = false;
+                    conditionY = false;
                 }
             }
             renderer.render(scene, camera);

@@ -92,16 +92,33 @@
 
         function render() {
             if(conditionX){
-                targetCamera.y = ( 1 - mouse.y ) * 0.001;
-                targetCamera.z=position.z;
-                camera.rotateX( 0.025 * ( targetCamera.y));
-                conditionX = false;
+                if(character.position.x - mouse.x < 0 && camera.rotation.y > -0.4){
+                    targetCamera.x = ( 1 - mouse.x ) * 0.001;
+                    targetCamera.z=position.z;
+                    camera.rotateY( 0.025 * ( targetCamera.x));
+                    conditionX = false;
+                }
+                else if (character.position.x - mouse.x >= 0 && camera.rotation.y < 0.4){
+                    targetCamera.x = ( 1 + mouse.x ) * 0.001;
+                    targetCamera.z=position.z;
+                    camera.rotateY( -0.025 * ( targetCamera.x));
+                    conditionX = false;
+                }
+
             }
             if(conditionY){
-                targetCamera.x = ( 1 - mouse.x ) * 0.001;
-                targetCamera.z=position.z;
-                camera.rotateY(0.025 * ( targetCamera.x));
-                conditionY = false;
+                if ((mouse.y - 350) < 0 && camera.rotation.y > -0.2){
+                    targetCamera.y = ( 1 + mouse.y - 350) * 0.001;
+                    targetCamera.z=position.z;
+                    camera.rotateX( -0.025 * ( targetCamera.y));
+                    conditionY = false;
+                }
+                else if ((mouse.y - 350) >= 0  && camera.rotation.y < 0.2){
+                    targetCamera.y = ( 1 - mouse.y - 350 ) * 0.001;
+                    targetCamera.z=position.z;
+                    camera.rotateX( 0.025 * ( targetCamera.y));
+                    conditionY = false;
+                }
             }
             renderer.render(scene, camera);
             miniMapRenderer.render(scene, topCamera);
