@@ -174,16 +174,16 @@
                 colliders.add(gltf.scene);
                 colliders.visible = false;
                 scene.add(colliders);
-            }); 
+            });
 
             // Make skybox Background
-            scene.background = new THREE.CubeTextureLoader().setPath('assets/skybox/').load([
-                'posx.jpg',
-                'negx.jpg',
-                'posy.jpg',
-                'negy.jpg',
-                'posz.jpg',
-                'negz.jpg'
+            scene.background = new THREE.CubeTextureLoader().setPath('assets/skybox/level2/').load([
+                'posx.png',
+                'negx.png',
+                'posy.png',
+                'negy.png',
+                'posz.png',
+                'negz.png'
             ]);
 
             // Put Richard into the game.

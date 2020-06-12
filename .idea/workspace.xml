@@ -2,6 +2,27 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b2aa2ebb-08de-4623-9894-4572702c301c" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level1/negx.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level1/negy.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level1/negz.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level1/posx.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level1/posy.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level1/posz.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level1/readme.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level2/negx.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level2/negy.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level2/negz.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level2/posx.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level2/posy.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level2/posz.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level2/readme.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level3/negx.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level3/negy.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level3/negz.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level3/posx.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level3/posy.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level3/posz.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/assets/skybox/level3/readme.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game/assets/music-and-video/klein_wars_outro.mp4" beforeDir="false" afterPath="$PROJECT_DIR$/game/assets/music-and-video/klein_wars_outro.mp4" afterDir="false" />
@@ -39,10 +60,11 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../Betesda-Studios backup/Betesda-Studios-Philani/game/richard's-quest-level3.html" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/game/assets" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Philani\Documents\Wits University\YOS 3\Computer Graphics and Visualisation\Betesda-Studios\game\assets" />
       <recent name="C:\Users\Philani\Documents\GitHub\Betesda-Studios\Betesda-Studios-Philani\game\assets\music-and-video" />
       <recent name="C:\Users\Philani\Documents\Wits University\YOS 3\Computer Graphics and Visualisation\Betesda-Studios-master\game" />
     </key>
@@ -68,6 +90,7 @@
       <workItem from="1590093058710" duration="2528000" />
       <workItem from="1591905809896" duration="278000" />
       <workItem from="1591906423106" duration="2012000" />
+      <workItem from="1591956580075" duration="782000" />
     </task>
     <task id="LOCAL-00001" summary="Update for Beta">
       <created>1590091786575</created>
@@ -95,10 +118,10 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="260" y="0" key="CommitChangelistDialog2/0.0.1366.728@0.0.1366.728" timestamp="1590091785033" />
-    <state x="463" y="119" key="FileChooserDialogImpl" timestamp="1591907155309">
+    <state x="463" y="119" key="FileChooserDialogImpl" timestamp="1591956703609">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="463" y="119" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1591907155309" />
+    <state x="463" y="119" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1591956703609" />
     <state x="275" y="97" key="Vcs.Push.Dialog.v2" timestamp="1590091896325">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
